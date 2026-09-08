@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title or "Job analysis" }} — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">{{ job.title or "Untitled job" }}</h2>
+    <p class="text-muted mb-0">
+      {{ job.company or "Unknown company" }}
+      {% if job.location %} · {{ job.location }}{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('job.index') }}" class="btn btn-outline-secondary btn-sm">Back to jobs</a>
+</div>
+
+{% if job.status == "completed" %}
+<div class="mb-4">
+  <a href="{{ url_for('matching.index', job_id=job.id) }}" class="btn btn-primary btn-sm">Match against a resume</a>
+</div>
+{% endif %}
+
+{% if job.status == "failed" %}
+  <div class="alert alert-danger">
+    Analysis failed: {{ job.error_message }}
+    <form method="POST" action="{{ url_for('job.reprocess', job_id=job.id) }}" class="d-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-sm btn-outline-danger ms-2">Retry</button>
+    </form>
+  </div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Job details</h6>
+      <dl class="mb-0 small">
+        <dt>Employment type</dt><dd>{{ job.employment_type.replace("_", " ")|capitalize if job.employment_type != "unknown" else "Not detected" }}</dd>
+        <dt>Work arrangement</dt><dd>{{ job.remote_status|capitalize if job.remote_status != "unknown" else "Not detected" }}</dd>
+        <dt>Salary</dt>
+        <dd>
+          {% if job.salary_min %}
+            {{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_min) }}{% if job.salary_max and job.salary_max != job.salary_min %} - {{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_max) }}{% endif %}
+            {% if job.salary_period %} / {{ job.salary_period }}{% endif %}
+          {% else %}
+            Not detected
+          {% endif %}
+        </dd>
+        <dt>Experience</dt>
+        <dd>
+          {% if job.experience_years_min %}
+            {{ job.experience_years_min }}{% if job.experience_years_max %}–{{ job.experience_years_max }}{% else %}+{% endif %} years
+          {% else %}
+            Not detected
+          {% endif %}
+        </dd>
+        <dt>Education</dt>
+        <dd>{{ job.education_requirement_text or "Not detected" }}</dd>
+      </dl>
+    </div>
+
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Required skills ({{ required_skills|length }})</h6>
+      {% if required_skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in required_skills %}
+            <span class="badge skill-chip">{{ js.skill.name }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None detected.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h6 class="mb-3">Preferred skills ({{ preferred_skills|length }})</h6>
+      {% if preferred_skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in preferred_skills %}
+            <span class="badge skill-chip">{{ js.skill.name }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None detected.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card p-3">
+      <h6 class="mb-3">Detected sections</h6>
+      {% if sections %}
+        <div class="accordion" id="jobSectionsAccordion">
+          {% for section in sections %}
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#jobsec{{ loop.index }}">
+                  {{ section.section_type|capitalize }}
+                </button>
+              </h2>
+              <div id="jobsec{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#jobSectionsAccordion">
+                <div class="accordion-body small" style="white-space:pre-line;">{{ section.content }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">No sections detected.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

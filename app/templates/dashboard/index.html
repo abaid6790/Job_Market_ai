@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">Welcome, {{ user.name }} 👋</h2>
+<p class="text-muted mb-4">Your career intelligence dashboard.</p>
+
+<div class="row g-3">
+  <div class="col-md-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Account status</div>
+      <div class="fs-5 fw-semibold text-success">Verified ✓</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Resume</div>
+      <div class="fs-5 fw-semibold">
+        {% if primary_resume %}
+          {% if primary_resume.status == "completed" %}
+            <span class="text-success">Uploaded ✓</span>
+          {% elif primary_resume.status == "failed" %}
+            <span class="text-danger">Parse failed</span>
+          {% else %}
+            <span class="text-warning">Processing…</span>
+          {% endif %}
+        {% else %}
+          Not uploaded
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Target role</div>
+      <div class="fs-5 fw-semibold">{{ profile.target_role if profile and profile.target_role else "Not set" }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Skills tracked</div>
+      <div class="fs-5 fw-semibold">{{ skill_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Certifications</div>
+      <div class="fs-5 fw-semibold">{{ cert_count }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4">
+  {% if not primary_resume %}
+    <div class="alert alert-info">
+      <a href="{{ url_for('resume.index') }}" class="alert-link">Upload your resume</a>
+      to auto-extract your skills and experience.
+    </div>
+  {% elif not profile or not profile.target_role %}
+    <div class="alert alert-info">
+      <a href="{{ url_for('profile.index') }}" class="alert-link">Complete your profile</a>
+      to set a target role and start tracking skills.
+    </div>
+  {% else %}
+    <div class="alert alert-light border">
+      Skill-gap analysis and market data land in the next phases.
+      <a href="{{ url_for('profile.index') }}">Manage your profile & skills</a>.
+    </div>
+  {% endif %}
+</div>
+
+<a href="{{ url_for('auth.delete_account') }}" class="small text-danger">Delete my account</a>
+{% endblock %}

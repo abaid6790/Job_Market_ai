@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Job Analyzer — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">Job Description Analyzer</h2>
+
+<div class="card p-4 mb-4">
+  <h5 class="mb-3">Analyze a job posting</h5>
+  <form method="POST" action="{{ url_for('job.analyze') }}" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.job_text.label(class="form-label") }}
+      {{ form.job_text(class="form-control" + (" is-invalid" if form.job_text.errors else ""), rows=8, placeholder="Paste the full job description here...") }}
+      {% for error in form.job_text.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="text-center text-muted small mb-3">— or —</div>
+    <div class="mb-3">
+      {{ form.file.label(class="form-label") }}
+      {{ form.file(class="form-control" + (" is-invalid" if form.file.errors else "")) }}
+      {% for error in form.file.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      <div class="form-text">PDF, DOCX, or TXT.</div>
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+
+{% if jobs %}
+  <div class="card p-3">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Company</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Analyzed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+          <tr>
+            <td><a href="{{ url_for('job.detail', job_id=job.id) }}">{{ job.title or "Untitled" }}</a></td>
+            <td>{{ job.company or "—" }}</td>
+            <td>{{ job.location or "—" }}</td>
+            <td>
+              {% if job.status == "completed" %}
+                <span class="badge text-bg-success">Completed</span>
+              {% elif job.status == "failed" %}
+                <span class="badge text-bg-danger" title="{{ job.error_message }}">Failed</span>
+              {% elif job.status == "processing" %}
+                <span class="badge text-bg-warning">Processing</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Pending</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ job.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td class="text-end">
+              <form method="POST" action="{{ url_for('job.delete', job_id=job.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-muted">No jobs analyzed yet.</p>
+{% endif %}
+{% endblock %}

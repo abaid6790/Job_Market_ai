@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title or "Job" }} — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">{{ job.title or "Untitled role" }}</h2>
+    <p class="text-muted mb-0">
+      {{ job.company or "Unknown company" }}
+      {% if job.location %} · {{ job.location }}{% endif %}
+      {% if job.remote_status != "unknown" %} · {{ job.remote_status|capitalize }}{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('job.search') }}" class="btn btn-outline-secondary btn-sm">Back to search</a>
+</div>
+
+<div class="d-flex gap-2 mb-4">
+  <form method="POST" action="{{ url_for('job.save', job_id=job.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-sm {{ 'btn-outline-secondary' if already_saved else 'btn-primary' }}" {% if already_saved %}disabled{% endif %}>
+      {{ "Saved ✓" if already_saved else "Save job" }}
+    </button>
+  </form>
+
+  {% if has_resumes %}
+    <form method="POST" action="{{ url_for('matching.quick_match', job_id=job.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-sm btn-outline-primary">Check my fit</button>
+    </form>
+  {% endif %}
+
+  <form method="POST" action="{{ url_for('assistant.start') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="job_id" value="{{ job.id }}">
+    <input type="hidden" name="question" value="Explain this job and how well I might fit it.">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Ask the assistant about this job</button>
+  </form>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Job details</h6>
+      <dl class="mb-0 small">
+        <dt>Employment type</dt><dd>{{ job.employment_type.replace("_", " ")|capitalize if job.employment_type != "unknown" else "Not detected" }}</dd>
+        <dt>Salary</dt>
+        <dd>
+          {% if job.salary_min %}
+            {{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_min) }}{% if job.salary_max and job.salary_max != job.salary_min %} - {{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_max) }}{% endif %}
+            {% if job.salary_period %} / {{ job.salary_period }}{% endif %}
+          {% else %}
+            Not detected
+          {% endif %}
+        </dd>
+        <dt>Experience</dt>
+        <dd>{% if job.experience_years_min %}{{ job.experience_years_min }}{% if job.experience_years_max %}–{{ job.experience_years_max }}{% endif %} years{% else %}Not detected{% endif %}</dd>
+        <dt>Education</dt><dd>{{ job.education_requirement_text or "Not detected" }}</dd>
+      </dl>
+    </div>
+
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Required skills ({{ required_skills|length }})</h6>
+      {% if required_skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in required_skills %}<span class="badge skill-chip">{{ js.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}<p class="text-muted small mb-0">None detected.</p>{% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h6 class="mb-3">Preferred skills ({{ preferred_skills|length }})</h6>
+      {% if preferred_skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in preferred_skills %}<span class="badge skill-chip">{{ js.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}<p class="text-muted small mb-0">None detected.</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card p-3">
+      <h6 class="mb-3">Full description</h6>
+      <div class="small" style="white-space:pre-line;">{{ job.raw_text }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

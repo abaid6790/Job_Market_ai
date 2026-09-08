@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Market Insights — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">Market Insights</h2>
+<p class="text-muted mb-4">Based on {{ total_jobs }} analyzed job posting{{ "s" if total_jobs != 1 else "" }}.</p>
+
+{% if not has_data %}
+  <div class="alert alert-info">
+    No jobs have been analyzed yet.
+    <a href="{{ url_for('job.index') }}" class="alert-link">Analyze a job description</a>
+    to start building market data — every job you analyze contributes to these insights.
+  </div>
+{% else %}
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Most in-demand skills</h6>
+        {% if skill_demand %}
+          <canvas id="skillDemandChart" height="220"></canvas>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Work arrangement</h6>
+        {% if remote_dist %}
+          <canvas id="remoteChart" height="220"></canvas>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-4">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Salary ({{ salary.currency if salary.available else "USD" }}/{{ salary.period if salary.available else "year" }})</h6>
+        {% if salary.available %}
+          <dl class="mb-0 small">
+            <dt>Median</dt><dd>${{ "{:,}".format(salary.median) }}</dd>
+            <dt>Average</dt><dd>${{ "{:,}".format(salary.average) }}</dd>
+            <dt>Range</dt><dd>${{ "{:,}".format(salary.min) }} – ${{ "{:,}".format(salary.max) }}</dd>
+          </dl>
+          <p class="text-muted small mb-0">Based on {{ salary.sample_size }} job{{ "s" if salary.sample_size != 1 else "" }}.</p>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data{% if salary.sample_size %} (only {{ salary.sample_size }} job{{ "s" if salary.sample_size != 1 else "" }} with salary info detected){% endif %}.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Experience required</h6>
+        {% if experience_dist.available %}
+          <canvas id="experienceChart" height="180"></canvas>
+        {% else %}
+          <p class="text-muted small mb-0">{{ experience_dist.reason }}</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Education requirement</h6>
+        {% if education_dist.available %}
+          <ul class="list-unstyled small mb-0">
+            {% for row in education_dist.breakdown %}
+              <li class="d-flex justify-content-between"><span>{{ row.level|capitalize }}</span><span>{{ row.percentage }}%</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Top job titles</h6>
+        {% if top_titles %}
+          <ol class="mb-0 small ps-3">
+            {% for t in top_titles %}<li>{{ t.title }} <span class="text-muted">({{ t.count }})</span></li>{% endfor %}
+          </ol>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card p-3 h-100">
+        <h6 class="mb-3">Top locations</h6>
+        {% if locations %}
+          <ul class="list-unstyled small mb-0">
+            {% for loc in locations %}
+              <li class="d-flex justify-content-between"><span>{{ loc.location }}</span><span>{{ loc.percentage }}%</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted small mb-0">Insufficient data.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3 mb-4">
+    <h6 class="mb-3">Skill co-occurrence (frequently required together)</h6>
+    {% if cooccurrence %}
+      <ul class="list-unstyled small mb-0">
+        {% for pair in cooccurrence %}
+          <li>{{ pair.skill_a.name }} + {{ pair.skill_b.name }} <span class="text-muted">({{ pair.count }} job{{ "s" if pair.count != 1 else "" }})</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted small mb-0">Insufficient data.</p>
+    {% endif %}
+  </div>
+
+  <div class="card p-3">
+    <h6 class="mb-3">Skill trends</h6>
+    {% if trends.available %}
+      <p class="text-muted small">Comparing {{ trends.previous_month }} to {{ trends.latest_month }}.</p>
+      <div class="row">
+        <div class="col-md-6">
+          <strong class="small">Increasing</strong>
+          <ul class="list-unstyled small">
+            {% for row in trends.increasing %}<li class="text-success">{{ row.skill.name }} +{{ row.change }}%</li>{% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <strong class="small">Decreasing</strong>
+          <ul class="list-unstyled small">
+            {% for row in trends.decreasing %}<li class="text-danger">{{ row.skill.name }} {{ row.change }}%</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-muted small mb-0">{{ trends.reason }}</p>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if has_data %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  {% if skill_demand %}
+  new Chart(document.getElementById('skillDemandChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ skill_demand | map(attribute='skill') | map(attribute='name') | list | tojson }},
+      datasets: [{
+        label: 'Demand %',
+        data: {{ skill_demand | map(attribute='percentage') | list | tojson }},
+        backgroundColor: '#4f46e5'
+      }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+  {% endif %}
+
+  {% if remote_dist %}
+  new Chart(document.getElementById('remoteChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Remote', 'Hybrid', 'On-site', 'Unknown'],
+      datasets: [{
+        data: [
+          {{ remote_dist.remote.count }},
+          {{ remote_dist.hybrid.count }},
+          {{ remote_dist.onsite.count }},
+          {{ remote_dist.unknown.count }}
+        ],
+        backgroundColor: ['#4f46e5', '#22c55e', '#f59e0b', '#94a3b8']
+      }]
+    }
+  });
+  {% endif %}
+
+  {% if experience_dist.available %}
+  new Chart(document.getElementById('experienceChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ experience_dist.breakdown | map(attribute='bucket') | list | tojson }},
+      datasets: [{
+        label: 'Jobs',
+        data: {{ experience_dist.breakdown | map(attribute='count') | list | tojson }},
+        backgroundColor: '#4f46e5'
+      }]
+    },
+    options: { plugins: { legend: { display: false } } }
+  });
+  {% endif %}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Skill Taxonomy — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h2>Skill Taxonomy</h2>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.data_import') }}" class="btn btn-outline-secondary btn-sm">Import job dataset</a>
+    <a href="{{ url_for('admin.ai_status') }}" class="btn btn-outline-secondary btn-sm">AI provider status</a>
+    <a href="{{ url_for('admin.learning_resources') }}" class="btn btn-outline-secondary btn-sm">Learning resources</a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6>Add category</h6>
+      <form method="POST" action="{{ url_for('admin.add_category') }}" class="row g-2">
+        {{ category_form.hidden_tag() }}
+        <div class="col-5">{{ category_form.name(class="form-control form-control-sm", placeholder="Name") }}</div>
+        <div class="col-5">{{ category_form.description(class="form-control form-control-sm", placeholder="Description (optional)") }}</div>
+        <div class="col-2">{{ category_form.submit(class="btn btn-primary btn-sm w-100") }}</div>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6>Add skill</h6>
+      <form method="POST" action="{{ url_for('admin.add_skill') }}" class="row g-2">
+        {{ skill_form.hidden_tag() }}
+        <div class="col-5">{{ skill_form.name(class="form-control form-control-sm", placeholder="Skill name") }}</div>
+        <div class="col-5">{{ skill_form.category_id(class="form-select form-select-sm") }}</div>
+        <div class="col-2">{{ skill_form.submit(class="btn btn-primary btn-sm w-100") }}</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if uncategorized %}
+<div class="card p-3 mb-4 border-warning">
+  <h6 class="text-warning">Pending review — user-suggested skills ({{ uncategorized|length }})</h6>
+  <table class="table table-sm align-middle mb-0">
+    <thead><tr><th>Skill</th><th>Assign category</th><th></th></tr></thead>
+    <tbody>
+      {% for skill in uncategorized %}
+        <tr>
+          <td>{{ skill.name }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.assign_category', skill_id=skill.id) }}" class="d-flex gap-2">
+              {{ assign_form.hidden_tag() }}
+              {{ assign_form.category_id(class="form-select form-select-sm", style="max-width:220px;") }}
+              {{ assign_form.submit(class="btn btn-sm btn-outline-primary") }}
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.deactivate_skill', skill_id=skill.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Deactivate</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% for category in categories %}
+  <div class="card p-3 mb-3">
+    <h6 class="taxonomy-category mb-3">{{ category.name }} <span class="text-muted small">({{ category.skills.count() }})</span></h6>
+    <div class="row g-2">
+      {% for skill in category.skills %}
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between align-items-center border rounded p-2">
+            <div>
+              <strong>{{ skill.name }}</strong>
+              {% if skill.aliases.count() %}
+                <div class="text-muted small">aliases: {{ skill.aliases | map(attribute='alias') | join(', ') }}</div>
+              {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('admin.add_alias', skill_id=skill.id) }}" class="d-flex gap-1">
+              {{ alias_form.hidden_tag() }}
+              {{ alias_form.alias(class="form-control form-control-sm", placeholder="add alias", style="width:120px;") }}
+              <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}

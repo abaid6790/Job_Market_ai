@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Skill Explorer — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">Skill Explorer</h2>
+<p class="text-muted mb-4">Demand across {{ total_jobs }} analyzed job posting{{ "s" if total_jobs != 1 else "" }}.</p>
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <a href="{{ url_for('market.skills') }}" class="btn btn-sm {{ 'btn-primary' if not selected_category_id else 'btn-outline-secondary' }}">All</a>
+  {% for cat in categories %}
+    <a href="{{ url_for('market.skills', category_id=cat.id) }}" class="btn btn-sm {{ 'btn-primary' if selected_category_id == cat.id else 'btn-outline-secondary' }}">{{ cat.name }}</a>
+  {% endfor %}
+</div>
+
+{% if demand %}
+  <div class="card p-3">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Skill</th><th>Category</th><th>Demand</th><th>Jobs</th></tr></thead>
+      <tbody>
+        {% for row in demand %}
+          <tr>
+            <td><a href="{{ url_for('market.skill_detail', skill_id=row.skill.id) }}">{{ row.skill.name }}</a></td>
+            <td class="text-muted small">{{ row.skill.category.name if row.skill.category else "Uncategorized" }}</td>
+            <td>
+              <div class="progress" style="height:6px; width:120px;">
+                <div class="progress-bar" style="width:{{ row.percentage }}%"></div>
+              </div>
+              <span class="small text-muted">{{ row.percentage }}%</span>
+            </td>
+            <td>{{ row.count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-muted">No skill demand data yet — analyze some jobs first.</p>
+{% endif %}
+{% endblock %}

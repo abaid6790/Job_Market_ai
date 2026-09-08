@@ -1,0 +1,35 @@
+Jordan Smith
+jordan.smith@example.com | (415) 555-0182
+linkedin.com/in/jordansmith | github.com/jordansmith
+
+SUMMARY
+Backend engineer with 5 years of experience building scalable APIs and
+data pipelines. Focused on Python, cloud infrastructure, and mentoring
+junior engineers.
+
+EXPERIENCE
+Senior Backend Engineer, Acme Analytics
+Jan 2022 - Present
+- Led migration of monolith to microservices using Docker and Kubernetes.
+- Built REST APIs with Flask and PostgreSQL serving 2M requests/day.
+- Mentored 3 junior engineers on testing practices with Pytest.
+
+Backend Engineer, DataForge Inc
+Jun 2019 - Dec 2021
+- Developed data pipelines using Apache Airflow and AWS.
+- Implemented CI/CD pipelines with Jenkins and GitHub Actions.
+- Wrote unit tests achieving 90% coverage.
+
+EDUCATION
+B.Sc. Computer Science, University of Springfield
+Aug 2015 - May 2019
+
+SKILLS
+Python, Flask, Django, Docker, Kubernetes, AWS, PostgreSQL, Git,
+Machine Learning, React, Communication, Leadership
+
+CERTIFICATIONS
+AWS Certified Solutions Architect
+
+ACHIEVEMENTS
+Speaker at PyCon 2023 on scaling data pipelines.

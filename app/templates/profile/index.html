@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "_form_macros.html" import field %}
+{% block title %}My Profile — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Profile</h2>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <h5 class="mb-3">Career Profile</h5>
+      <form method="POST" action="{{ url_for('profile.index') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">{{ field(form.current_role) }}</div>
+          <div class="col-md-6">{{ field(form.target_role) }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{{ field(form.location) }}</div>
+          <div class="col-md-6">{{ field(form.years_experience) }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{{ field(form.education_level) }}</div>
+          <div class="col-md-6">{{ field(form.remote_preference) }}</div>
+        </div>
+        {{ field(form.preferred_industries) }}
+        {{ field(form.preferred_locations) }}
+        {{ field(form.bio) }}
+        {{ form.submit(class="btn btn-primary") }}
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card p-4 mb-4">
+      <h5 class="mb-3">Skills</h5>
+      <form method="POST" action="{{ url_for('profile.add_skill') }}" class="mb-3" novalidate autocomplete="off">
+        {{ skill_form.hidden_tag() }}
+        <div class="position-relative mb-2">
+          {{ skill_form.skill_name(class="form-control", id="skillNameInput", placeholder="e.g. Python, Docker, Communication") }}
+          <div id="skillSuggestions" class="skill-suggestions list-group shadow-sm"></div>
+        </div>
+        <div class="row g-2">
+          <div class="col-6">{{ skill_form.proficiency(class="form-select form-select-sm") }}</div>
+          <div class="col-6">{{ skill_form.years_experience(class="form-control form-control-sm", placeholder="Years") }}</div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Add skill</button>
+      </form>
+
+      {% if user_skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for us in user_skills %}
+            <span class="badge skill-chip">
+              {{ us.skill.name }}
+              {% if us.proficiency %}<span class="text-muted">· {{ us.proficiency }}</span>{% endif %}
+              {% if us.skill.is_user_suggested %}<span class="text-warning" title="Pending taxonomy review">★</span>{% endif %}
+              <form method="POST" action="{{ url_for('profile.delete_skill', user_skill_id=us.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-close btn-close-white btn-sm ms-1" aria-label="Remove"></button>
+              </form>
+            </span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">No skills added yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-4">
+      <h5 class="mb-3">Certifications</h5>
+      <form method="POST" action="{{ url_for('profile.add_certification') }}" class="mb-3" novalidate>
+        {{ cert_form.hidden_tag() }}
+        {{ cert_form.name(class="form-control form-control-sm mb-2", placeholder="Certification name") }}
+        <div class="row g-2">
+          <div class="col-7">{{ cert_form.issuing_organization(class="form-control form-control-sm", placeholder="Issuer") }}</div>
+          <div class="col-5">{{ cert_form.year_obtained(class="form-control form-control-sm", placeholder="Year") }}</div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Add certification</button>
+      </form>
+
+      {% if certifications %}
+        <ul class="list-group list-group-flush">
+          {% for cert in certifications %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <span>
+                <strong>{{ cert.name }}</strong>
+                {% if cert.issuing_organization %}<br><span class="text-muted small">{{ cert.issuing_organization }}{% if cert.year_obtained %} · {{ cert.year_obtained }}{% endif %}</span>{% endif %}
+              </span>
+              <form method="POST" action="{{ url_for('profile.delete_certification', cert_id=cert.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small mb-0">No certifications added yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/skill_autocomplete.js') }}"></script>
+{% endblock %}

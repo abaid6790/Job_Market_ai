@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Saved Jobs — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h2>Saved Jobs</h2>
+  <a href="{{ url_for('saved_jobs.tracker') }}" class="btn btn-outline-secondary btn-sm">View application tracker</a>
+</div>
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <a href="{{ url_for('saved_jobs.index') }}" class="btn btn-sm {{ 'btn-primary' if not status_filter else 'btn-outline-secondary' }}">All</a>
+  {% for status in ["saved", "applied", "interview", "offer", "rejected"] %}
+    <a href="{{ url_for('saved_jobs.index', status=status) }}" class="btn btn-sm {{ 'btn-primary' if status_filter == status else 'btn-outline-secondary' }}">{{ status|capitalize }}</a>
+  {% endfor %}
+</div>
+
+{% if saved_jobs %}
+  {% for sj in saved_jobs %}
+    <div class="card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <h6 class="mb-1"><a href="{{ url_for('job.browse_detail', job_id=sj.job.id) }}">{{ sj.job.title or "Untitled role" }}</a></h6>
+          <p class="text-muted small mb-0">{{ sj.job.company or "" }}{% if sj.job.location %} · {{ sj.job.location }}{% endif %}</p>
+        </div>
+        <span class="badge {{ {'saved':'text-bg-secondary','applied':'text-bg-info','interview':'text-bg-warning','offer':'text-bg-success','rejected':'text-bg-danger'}[sj.status] }}">{{ sj.status|capitalize }}</span>
+      </div>
+
+      <form method="POST" action="{{ url_for('saved_jobs.update', saved_job_id=sj.id) }}" class="row g-2 align-items-end">
+        {{ forms[sj.id].hidden_tag() }}
+        <div class="col-md-2">
+          {{ forms[sj.id].status.label(class="form-label small") }}
+          {{ forms[sj.id].status(class="form-select form-select-sm") }}
+        </div>
+        <div class="col-md-2">
+          {{ forms[sj.id].application_date.label(class="form-label small") }}
+          {{ forms[sj.id].application_date(class="form-control form-control-sm", placeholder="YYYY-MM-DD") }}
+        </div>
+        <div class="col-md-2">
+          {{ forms[sj.id].interview_date.label(class="form-label small") }}
+          {{ forms[sj.id].interview_date(class="form-control form-control-sm", placeholder="YYYY-MM-DD") }}
+        </div>
+        <div class="col-md-4">
+          {{ forms[sj.id].notes.label(class="form-label small") }}
+          {{ forms[sj.id].notes(class="form-control form-control-sm", rows=1) }}
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+          {{ forms[sj.id].submit(class="btn btn-sm btn-primary") }}
+        </div>
+      </form>
+      <form method="POST" action="{{ url_for('saved_jobs.delete', saved_job_id=sj.id) }}" class="mt-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+      </form>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">No saved jobs yet. <a href="{{ url_for('job.search') }}">Search for jobs</a> to save some.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+Platform Infrastructure Engineer
+Nimbus Cloud — Remote
+
+About the role
+We're hiring a Platform Infrastructure Engineer to help us build out our
+next-generation infrastructure. Full-time position.
+
+Requirements
+- 6+ years of experience in infrastructure engineering
+- Strong proficiency in Terraform and GraphQL
+- Experience with Rust
+- Master's degree in Computer Science or related field
+
+Preferred Qualifications
+- Experience with Elasticsearch and Kafka
+
+Compensation
+$160,000 - $200,000 per year

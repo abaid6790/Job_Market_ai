@@ -1,0 +1,27 @@
+Senior Backend Engineer
+Acme Analytics — San Francisco, CA (Remote)
+
+About the role
+We are looking for a Senior Backend Engineer to join our growing team and
+help us scale our data platform. Full-time position.
+
+Responsibilities
+- Design and build scalable REST APIs
+- Lead a small team of engineers
+- Own the deployment pipeline
+
+Requirements
+- 5+ years of experience in backend development
+- Strong proficiency in Python and Flask
+- Experience with PostgreSQL and Docker
+- Bachelor's degree in Computer Science or related field
+
+Preferred Qualifications
+- Experience with Kubernetes and AWS
+- Familiarity with Machine Learning concepts
+
+Compensation
+$140,000 - $180,000 per year
+
+Benefits
+Health insurance, 401k matching, unlimited PTO

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}My Resume — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Resume</h2>
+
+<div class="card p-4 mb-4">
+  <h5 class="mb-3">Upload a resume</h5>
+  <form method="POST" action="{{ url_for('resume.upload') }}" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.file(class="form-control" + (" is-invalid" if form.file.errors else "")) }}
+      {% for error in form.file.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      <div class="form-text">PDF, DOCX, or TXT — up to 10 MB.</div>
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+
+{% if resumes %}
+  <div class="card p-3">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Status</th>
+          <th>Uploaded</th>
+          <th>Primary</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for resume in resumes %}
+          <tr>
+            <td>
+              <a href="{{ url_for('resume.detail', resume_id=resume.id) }}">{{ resume.original_filename }}</a>
+              <div class="text-muted small">{{ (resume.file_size_bytes / 1024) | round(1) }} KB · {{ resume.file_type|upper }}</div>
+            </td>
+            <td>
+              {% if resume.status == "completed" %}
+                <span class="badge text-bg-success">Completed</span>
+              {% elif resume.status == "failed" %}
+                <span class="badge text-bg-danger" title="{{ resume.error_message }}">Failed</span>
+              {% elif resume.status == "processing" %}
+                <span class="badge text-bg-warning">Processing</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Pending</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ resume.uploaded_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>
+              {% if resume.is_primary %}
+                <span class="badge text-bg-primary">Primary</span>
+              {% else %}
+                <form method="POST" action="{{ url_for('resume.set_primary', resume_id=resume.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-outline-secondary">Make primary</button>
+                </form>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('resume.download', resume_id=resume.id) }}" class="btn btn-sm btn-outline-secondary">Download</a>
+              <form method="POST" action="{{ url_for('resume.delete', resume_id=resume.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-muted">No resumes uploaded yet.</p>
+{% endif %}
+{% endblock %}

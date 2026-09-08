@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_form_macros.html" import field %}
+{% block title %}Delete account — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="auth-card mx-auto">
+  <h2 class="mb-1 text-danger">Delete your account</h2>
+  <p class="text-muted mb-4">
+    This permanently deletes your account and all associated data
+    (resumes, analyses, saved jobs, roadmap). This cannot be undone.
+  </p>
+  <form method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    {{ field(form.password, autofocus=True) }}
+    <div class="d-grid">
+      {{ form.submit(class="btn btn-danger") }}
+    </div>
+  </form>
+</div>
+{% endblock %}

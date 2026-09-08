@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Application Tracker — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h2>Application Tracker</h2>
+  <a href="{{ url_for('saved_jobs.index') }}" class="btn btn-outline-secondary btn-sm">Back to saved jobs</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md">
+    <div class="card p-3 text-center">
+      <div class="fs-3 fw-bold">{{ counts.saved }}</div>
+      <div class="text-muted small">Saved</div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card p-3 text-center">
+      <div class="fs-3 fw-bold">{{ counts.applied }}</div>
+      <div class="text-muted small">Applied</div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card p-3 text-center">
+      <div class="fs-3 fw-bold">{{ counts.interview }}</div>
+      <div class="text-muted small">Interview</div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card p-3 text-center">
+      <div class="fs-3 fw-bold">{{ counts.offer }}</div>
+      <div class="text-muted small">Offer</div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="card p-3 text-center">
+      <div class="fs-3 fw-bold">{{ counts.rejected }}</div>
+      <div class="text-muted small">Rejected</div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Conversion rates</h6>
+  {% if applications %}
+    <p class="small mb-1">{{ applications }} total application{{ "s" if applications != 1 else "" }}.</p>
+    <p class="small mb-1">Applications → Interview or better: <strong>{{ interview_rate }}%</strong></p>
+    <p class="small mb-0">Applications → Offer: <strong>{{ offer_rate }}%</strong></p>
+  {% else %}
+    <p class="text-muted small mb-0">No applications tracked yet — update a saved job's status to "Applied" to start tracking.</p>
+  {% endif %}
+</div>
+
+{% if application_stage_jobs %}
+  <div class="card p-3">
+    <h6 class="mb-3">Applications</h6>
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Job</th><th>Status</th><th>Applied</th><th>Interview</th></tr></thead>
+      <tbody>
+        {% for sj in application_stage_jobs %}
+          <tr>
+            <td><a href="{{ url_for('job.browse_detail', job_id=sj.job.id) }}">{{ sj.job.title or "Untitled role" }}</a></td>
+            <td>{{ sj.status|capitalize }}</td>
+            <td class="text-muted small">{{ sj.application_date.strftime("%Y-%m-%d") if sj.application_date else "—" }}</td>
+            <td class="text-muted small">{{ sj.interview_date.strftime("%Y-%m-%d") if sj.interview_date else "—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

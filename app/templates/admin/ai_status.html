@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}AI Provider Status — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h2>AI Provider Status</h2>
+  <a href="{{ url_for('admin.taxonomy') }}" class="btn btn-outline-secondary btn-sm">Back to admin</a>
+</div>
+
+{% if not configured %}
+  <div class="alert alert-warning">
+    No AI providers are configured. Set at least one of
+    <code>GEMINI_API_KEY_1</code>, <code>GROQ_API_KEY</code>,
+    <code>OPENROUTER_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>, or
+    <code>OPENAI_API_KEY</code> in your environment to enable AI features.
+    This is expected and safe — the app runs fully without any AI provider;
+    AI-dependent features (career assistant, resume improvement, etc.) simply
+    aren't available until a key is configured.
+  </div>
+{% else %}
+  <div class="card p-3 mb-4">
+    <h6 class="mb-2">Fallback order</h6>
+    <p class="mb-0">
+      {% for name in fallback_order %}
+        <span class="badge {{ 'text-bg-primary' if loop.first else 'text-bg-secondary' }}">{{ name }}</span>
+        {% if not loop.last %}→{% endif %}
+      {% endfor %}
+    </p>
+  </div>
+
+  <div class="row g-3 mb-4">
+    {% for p in provider_details %}
+      <div class="col-md-4">
+        <div class="card p-3 h-100">
+          <h6 class="d-flex justify-content-between">
+            {{ p.name }}
+            {% if p.is_default %}<span class="badge text-bg-primary">default</span>{% endif %}
+          </h6>
+          <p class="text-muted small mb-1">Model: {{ p.model or "—" }}</p>
+          {% if p.key_status %}
+            <p class="small mb-1">Keys: {{ p.key_status|length }}</p>
+            <ul class="list-unstyled small mb-0">
+              {% for k in p.key_status %}
+                <li>
+                  ...{{ k.key_suffix }} —
+                  {% if k.available %}<span class="text-success">available</span>
+                  {% else %}<span class="text-danger">cooldown ({{ k.cooldown_remaining_seconds }}s)</span>{% endif %}
+                  {% if k.failure_count %}· {{ k.failure_count }} failures{% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Usage statistics</h6>
+  {% if stats.available %}
+    <div class="row g-3 small">
+      <div class="col-md-3"><strong>{{ stats.total_requests }}</strong><br>Total requests</div>
+      <div class="col-md-3"><strong>{{ stats.success_rate }}%</strong><br>Success rate</div>
+      <div class="col-md-3"><strong>{{ stats.cache_hit_rate }}%</strong><br>Cache hit rate</div>
+      <div class="col-md-3"><strong>{{ stats.avg_response_time_ms or "—" }}ms</strong><br>Avg response time</div>
+    </div>
+    {% if stats.by_provider %}
+      <table class="table table-sm mt-3 mb-0">
+        <thead><tr><th>Provider</th><th>Success</th><th>Failure</th></tr></thead>
+        <tbody>
+          {% for provider, counts in stats.by_provider.items() %}
+            <tr><td>{{ provider }}</td><td>{{ counts.success }}</td><td>{{ counts.failure }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  {% else %}
+    <p class="text-muted small mb-0">No AI requests logged yet.</p>
+  {% endif %}
+</div>
+
+{% if recent_usage %}
+  <div class="card p-3">
+    <h6 class="mb-3">Recent requests</h6>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Time</th><th>Provider</th><th>Method</th><th>Status</th><th>ms</th></tr></thead>
+      <tbody>
+        {% for u in recent_usage %}
+          <tr>
+            <td class="text-muted small">{{ u.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ u.provider }}{% if u.cache_hit %} <span class="badge text-bg-info">cache</span>{% endif %}</td>
+            <td>{{ u.method }}</td>
+            <td>{% if u.success %}<span class="text-success">OK</span>{% else %}<span class="text-danger" title="{{ u.error_message }}">Failed</span>{% endif %}</td>
+            <td>{{ u.response_time_ms or "—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

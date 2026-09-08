@@ -1,0 +1,16 @@
+{% macro field(f, autofocus=False) %}
+  <div class="mb-3">
+    {{ f.label(class="form-label") }}
+    {% if f.type == "PasswordField" %}
+      <div class="input-group">
+        {{ f(class="form-control" + (" is-invalid" if f.errors else ""), autofocus=autofocus) }}
+        <button class="btn btn-outline-secondary toggle-password" type="button" aria-label="Show password">👁</button>
+      </div>
+    {% else %}
+      {{ f(class="form-control" + (" is-invalid" if f.errors else ""), autofocus=autofocus) }}
+    {% endif %}
+    {% for error in f.errors %}
+      <div class="invalid-feedback d-block">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endmacro %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Match Report — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">{{ report.resume.original_filename }} vs. {{ report.job.title or "Untitled job" }}</h2>
+    <p class="text-muted mb-0">{{ report.job.company or "" }}{% if report.job.location %} · {{ report.job.location }}{% endif %}</p>
+  </div>
+  <a href="{{ url_for('matching.index') }}" class="btn btn-outline-secondary btn-sm">Back to match analysis</a>
+</div>
+
+<div class="alert alert-light border small">
+  Match scores are estimates based on detected skills, keywords, and structured fields — not a guarantee of employment or interview outcomes.
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card p-4 text-center h-100">
+      <div class="text-muted small mb-1">Overall Match</div>
+      {% if report.overall_score is not none %}
+        <div class="display-4 fw-bold {{ 'text-success' if report.overall_score >= 70 else ('text-warning' if report.overall_score >= 40 else 'text-danger') }}">{{ report.overall_score }}%</div>
+      {% else %}
+        <div class="text-muted">Insufficient data</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card p-4 h-100">
+      <h6 class="mb-3">Score breakdown</h6>
+      {% for label, value in [
+        ("Skills", report.skills_score),
+        ("Experience", report.experience_score),
+        ("Education", report.education_score),
+        ("Keyword coverage", report.keyword_coverage_score),
+        ("Semantic similarity", report.semantic_similarity_score),
+      ] %}
+        <div class="mb-2">
+          <div class="d-flex justify-content-between small">
+            <span>{{ label }}</span>
+            <span>{{ (value ~ "%") if value is not none else "Insufficient data" }}</span>
+          </div>
+          <div class="progress" style="height:6px;">
+            <div class="progress-bar" style="width:{{ value if value is not none else 0 }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="text-danger mb-3">Critical gaps — required, missing ({{ critical|length }})</h6>
+      {% if critical %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for gap in critical %}<span class="badge skill-chip border-danger">{{ gap.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None — you have all required skills detected for this job.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3 mb-4">
+      <h6 class="text-warning mb-3">Important gaps — preferred, missing ({{ important|length }})</h6>
+      {% if important %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for gap in important %}<span class="badge skill-chip border-warning">{{ gap.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None detected.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h6 class="mb-3">Optional — related skills worth considering ({{ optional|length }})</h6>
+      {% if optional %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for gap in optional %}<span class="badge skill-chip">{{ gap.skill.name }}</span>{% endfor %}
+        </div>
+        <p class="text-muted small mt-2 mb-0">Based on skills frequently required alongside this job's skills across all analyzed postings.</p>
+      {% else %}
+        <p class="text-muted small mb-0">Not enough market data yet to suggest related skills.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="text-success mb-3">You have — required ({{ matched_required|length }})</h6>
+      {% if matched_required %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in matched_required %}<span class="badge skill-chip border-success">{{ js.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None matched.</p>
+      {% endif %}
+    </div>
+    <div class="card p-3">
+      <h6 class="text-success mb-3">You have — preferred ({{ matched_preferred|length }})</h6>
+      {% if matched_preferred %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for js in matched_preferred %}<span class="badge skill-chip border-success">{{ js.skill.name }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">None matched.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('matching.delete', report_id=report.id) }}" class="mt-4">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn btn-sm btn-outline-danger">Delete this report</button>
+</form>
+{% endblock %}

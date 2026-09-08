@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Something went wrong — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="display-4">500</h1>
+  <p class="text-muted">Something went wrong on our end. It's been logged.</p>
+  <a href="{{ url_for('main.index') }}" class="btn btn-primary">Go home</a>
+</div>
+{% endblock %}

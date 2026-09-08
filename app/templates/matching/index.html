@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Match Analysis — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">Resume ↔ Job Match Analysis</h2>
+
+{% if not has_resumes or not has_jobs %}
+  <div class="alert alert-info">
+    You need at least one fully processed resume and one analyzed job to run a match.
+    {% if not has_resumes %}<a href="{{ url_for('resume.index') }}" class="alert-link">Upload a resume</a>.{% endif %}
+    {% if not has_jobs %}<a href="{{ url_for('job.index') }}" class="alert-link">Analyze a job</a>.{% endif %}
+  </div>
+{% else %}
+  <div class="card p-4 mb-4">
+    <h5 class="mb-3">Run a new match</h5>
+    <form method="POST" action="{{ url_for('matching.analyze') }}" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+          {{ form.resume_id.label(class="form-label") }}
+          {{ form.resume_id(class="form-select") }}
+        </div>
+        <div class="col-md-5">
+          {{ form.job_id.label(class="form-label") }}
+          {{ form.job_id(class="form-select") }}
+        </div>
+        <div class="col-md-2">
+          {{ form.submit(class="btn btn-primary w-100") }}
+        </div>
+      </div>
+    </form>
+  </div>
+{% endif %}
+
+{% if reports %}
+  <div class="card p-3">
+    <h6 class="mb-3">Past match reports</h6>
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Resume</th><th>Job</th><th>Overall</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+        {% for report in reports %}
+          <tr>
+            <td>{{ report.resume.original_filename }}</td>
+            <td>{{ report.job.title or "Untitled" }}</td>
+            <td>
+              {% if report.overall_score is not none %}
+                <span class="badge {{ 'text-bg-success' if report.overall_score >= 70 else ('text-bg-warning' if report.overall_score >= 40 else 'text-bg-danger') }}">{{ report.overall_score }}%</span>
+              {% else %}
+                <span class="text-muted small">Insufficient data</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ report.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td class="text-end"><a href="{{ url_for('matching.detail', report_id=report.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}AI Career Assistant — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">AI Career Assistant</h2>
+<p class="text-muted mb-4">Ask about your skills, gaps, and matches — grounded in your actual profile, resume, and job analyses.</p>
+
+{% if not provider_available %}
+  <div class="alert alert-warning">
+    No AI provider is currently configured for this deployment, so the assistant can't generate real answers right now.
+    You can still start a conversation — it'll explain this clearly rather than failing silently.
+  </div>
+{% endif %}
+
+<div class="card p-4 mb-4">
+  <h6 class="mb-3">Ask a question</h6>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    {% for q in suggested_questions %}
+      <button type="button" class="btn btn-sm btn-outline-secondary suggested-question" data-question="{{ q }}">{{ q }}</button>
+    {% endfor %}
+  </div>
+  <form method="POST" action="{{ url_for('assistant.start') }}" novalidate>
+    {{ form.hidden_tag() }}
+    {{ form.question(class="form-control mb-2", rows=3, placeholder="e.g. What should I learn next?", id="questionInput") }}
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+
+{% if conversations %}
+  <div class="card p-3">
+    <h6 class="mb-3">Past conversations</h6>
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Question</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+        {% for conv in conversations %}
+          <tr>
+            <td><a href="{{ url_for('assistant.conversation', conversation_id=conv.id) }}">{{ conv.title or "Untitled conversation" }}</a></td>
+            <td class="text-muted small">{{ conv.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td class="text-end">
+              <form method="POST" action="{{ url_for('assistant.delete', conversation_id=conv.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll(".suggested-question").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.getElementById("questionInput").value = btn.dataset.question;
+    });
+  });
+</script>
+{% endblock %}

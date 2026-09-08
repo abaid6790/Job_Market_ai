@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}JobMarket AI — Job Market & Skill Intelligence{% endblock %}
+{% block content %}
+<div class="hero text-center py-5">
+  <h1 class="display-5 fw-bold mb-3">Know exactly what the job market wants.</h1>
+  <p class="lead text-muted mb-4 mx-auto" style="max-width: 640px;">
+    Upload your resume, analyze real job postings, and get a personalized
+    skill-gap roadmap — powered by NLP and AI.
+  </p>
+  <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-2">Get started free</a>
+  <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">Log in</a>
+</div>
+
+<div class="row g-4 mt-4">
+  <div class="col-md-4">
+    <div class="card h-100 p-3">
+      <h5>📄 Resume Intelligence</h5>
+      <p class="text-muted mb-0">Structured parsing and skill extraction from your resume.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 p-3">
+      <h5>📊 Market Insights</h5>
+      <p class="text-muted mb-0">See what skills, tools, and certifications are actually in demand.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 p-3">
+      <h5>🧭 Career Roadmap</h5>
+      <p class="text-muted mb-0">Personalized, trackable plan to close your skill gaps.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

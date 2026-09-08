@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Job Search — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">Job Search</h2>
+
+<div class="card p-4 mb-4">
+  <form method="GET" action="{{ url_for('job.search') }}" class="row g-3">
+    <div class="col-md-4">
+      {{ form.query.label(class="form-label") }}
+      {{ form.query(class="form-control", placeholder="e.g. Backend Engineer") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.location.label(class="form-label") }}
+      {{ form.location(class="form-control", placeholder="e.g. Remote, Austin") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.remote_status.label(class="form-label") }}
+      {{ form.remote_status(class="form-select") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.employment_type.label(class="form-label") }}
+      {{ form.employment_type(class="form-select") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.max_experience.label(class="form-label") }}
+      {{ form.max_experience(class="form-control", placeholder="e.g. 3") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.min_salary.label(class="form-label") }}
+      {{ form.min_salary(class="form-control", placeholder="e.g. 100000") }}
+    </div>
+    <div class="col-12">
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+
+{% if results.items %}
+  <p class="text-muted small">{{ results.total }} job{{ "s" if results.total != 1 else "" }} found.</p>
+  <div class="row g-3">
+    {% for job in results.items %}
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <h6 class="mb-1"><a href="{{ url_for('job.browse_detail', job_id=job.id) }}">{{ job.title or "Untitled role" }}</a></h6>
+            {% if job.id in saved_job_ids %}<span class="badge text-bg-secondary">Saved</span>{% endif %}
+          </div>
+          <p class="text-muted small mb-2">
+            {{ job.company or "Unknown company" }}{% if job.location %} · {{ job.location }}{% endif %}
+            {% if job.remote_status != "unknown" %} · {{ job.remote_status|capitalize }}{% endif %}
+          </p>
+          {% if job.salary_min %}
+            <p class="small mb-2">{{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_min) }}{% if job.salary_max and job.salary_max != job.salary_min %} - {{ job.salary_currency or "" }}{{ "{:,}".format(job.salary_max) }}{% endif %}{% if job.salary_period %} / {{ job.salary_period }}{% endif %}</p>
+          {% endif %}
+          <a href="{{ url_for('job.browse_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary mt-auto">View details</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <nav class="mt-4">
+    <ul class="pagination">
+      {% if results.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('job.search', page=results.prev_num, **request.args) }}">Previous</a></li>
+      {% endif %}
+      {% if results.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('job.search', page=results.next_num, **request.args) }}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% else %}
+  <p class="text-muted">No jobs match your search.</p>
+{% endif %}
+{% endblock %}

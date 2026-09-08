@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "_form_macros.html" import field %}
+{% block title %}Role Explorer — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">Role Explorer</h2>
+
+<div class="card p-4 mb-4">
+  <form method="GET" action="{{ url_for('market.roles') }}" class="row g-2 align-items-end">
+    {{ form.hidden_tag() }}
+    <div class="col-auto flex-grow-1">
+      {{ form.title.label(class="form-label") }}
+      {{ form.title(class="form-control", placeholder="e.g. Backend Engineer", value=query or "") }}
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+</div>
+
+{% if result %}
+  {% if result.available %}
+    <div class="card p-4 mb-4">
+      <h5 class="mb-1">"{{ result.query }}"</h5>
+      <p class="text-muted">{{ result.job_count }} matching job{{ "s" if result.job_count != 1 else "" }} analyzed.</p>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h6>Top skills</h6>
+          {% if result.top_skills %}
+            <ul class="list-unstyled small">
+              {% for row in result.top_skills %}
+                <li class="d-flex justify-content-between"><span>{{ row.skill.name }}</span><span>{{ row.percentage }}%</span></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted small">Insufficient data.</p>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <h6>Stats</h6>
+          <dl class="small mb-0">
+            <dt>Average experience</dt>
+            <dd>{{ result.avg_experience_years ~ " years" if result.avg_experience_years is not none else "Insufficient data" }}</dd>
+            <dt>Average salary (USD/year)</dt>
+            <dd>
+              {% if result.avg_salary_usd_year %}
+                ${{ "{:,}".format(result.avg_salary_usd_year) }} (based on {{ result.avg_salary_sample_size }} jobs)
+              {% else %}
+                Insufficient data
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">{{ result.reason }}</div>
+  {% endif %}
+{% endif %}
+
+<div class="card p-3">
+  <h6 class="mb-3">Most common titles in your data</h6>
+  {% if top_titles %}
+    <div class="d-flex flex-wrap gap-2">
+      {% for t in top_titles %}
+        <a href="{{ url_for('market.roles', title=t.title) }}" class="badge skill-chip text-decoration-none">{{ t.title }} ({{ t.count }})</a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted small mb-0">No titles analyzed yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
