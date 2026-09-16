@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Resume Improvement — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Resume Improvement</h2>
+    <p class="text-muted mb-0">Suggestions based only on what's actually in your resume — nothing invented.</p>
+  </div>
+  <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary btn-sm">Back to reports</a>
+</div>
+
+{% if resumes %}
+  <div class="card p-3">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Resume</th><th>Analyze against a job (optional)</th></tr></thead>
+      <tbody>
+        {% for resume in resumes %}
+          <tr>
+            <td>{{ resume.original_filename }}</td>
+            <td>
+              <div class="d-flex flex-wrap gap-1">
+                <a href="{{ url_for('reports.improve_detail', resume_id=resume.id) }}" class="btn btn-sm btn-outline-primary">General</a>
+                {% for job in jobs[:5] %}
+                  <a href="{{ url_for('reports.improve_detail', resume_id=resume.id, job_id=job.id) }}" class="btn btn-sm btn-outline-secondary">{{ job.title or "Untitled" }}</a>
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">
+    <a href="{{ url_for('resume.index') }}" class="alert-link">Upload a resume</a> first.
+  </div>
+{% endif %}
+{% endblock %}

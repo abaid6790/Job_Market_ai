@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}ATS Analysis — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">ATS Analysis</h2>
+    <p class="text-muted mb-0">{{ report.resume.original_filename }} vs. {{ report.job.title or "Untitled job" }}</p>
+  </div>
+  <a href="{{ url_for('reports.ats_index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<div class="alert alert-warning">{{ analysis.disclaimer }}</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Keyword coverage</h6>
+      {% if analysis.keyword_coverage %}
+        <div class="fs-4 fw-semibold mb-2">{{ analysis.keyword_coverage.score }}%</div>
+        <p class="small mb-1"><strong>Missing terms ({{ analysis.keyword_coverage.missing|length }}):</strong></p>
+        <p class="small text-muted">{{ analysis.keyword_coverage.missing[:20]|join(", ") or "None" }}</p>
+      {% else %}
+        <p class="text-muted small mb-0">Insufficient text to compute keyword coverage.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Required skills ({{ analysis.required_skills.matched|length }}/{{ analysis.required_skills.total }})</h6>
+      {% if analysis.required_skills.missing %}
+        <p class="small mb-1 text-danger"><strong>Missing:</strong></p>
+        <div class="d-flex flex-wrap gap-2">
+          {% for skill in analysis.required_skills.missing %}<span class="badge skill-chip border-danger">{{ skill }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-success small mb-0">All detected required skills are present.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Job title alignment</h6>
+      {% if analysis.job_title_alignment.available %}
+        <div class="fs-5 fw-semibold">{{ analysis.job_title_alignment.coverage_pct }}%</div>
+        <p class="text-muted small mb-0">Title words found in your resume: {{ analysis.job_title_alignment.matched_words|join(", ") or "none" }}</p>
+      {% else %}
+        <p class="text-muted small mb-0">Not enough data to assess title alignment.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Section structure</h6>
+      <p class="small mb-1">Present: {{ analysis.section_structure.present|join(", ") or "none detected" }}</p>
+      {% if analysis.section_structure.missing %}
+        <p class="small text-warning mb-0">Missing: {{ analysis.section_structure.missing|join(", ") }}</p>
+      {% else %}
+        <p class="small text-success mb-0">All expected sections detected.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h6 class="mb-3">Formatting checks</h6>
+      {% if analysis.formatting_problems %}
+        <ul class="small mb-0">
+          {% for problem in analysis.formatting_problems %}<li>{{ problem }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-success small mb-0">No formatting problems detected.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

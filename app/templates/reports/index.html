@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Reports — {{ app_name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">Reports</h2>
+<p class="text-muted mb-4">Export your analyses as PDF, CSV, or JSON. Every report contains only data already computed in the app.</p>
+
+<div class="d-flex gap-2 mb-4">
+  <a href="{{ url_for('reports.ats_index') }}" class="btn btn-outline-primary btn-sm">ATS Analysis</a>
+  <a href="{{ url_for('reports.improve_index') }}" class="btn btn-outline-primary btn-sm">Resume Improvement</a>
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Resume analysis reports</h6>
+  {% if resumes %}
+    <table class="table table-sm align-middle mb-0">
+      <tbody>
+        {% for resume in resumes %}
+          <tr>
+            <td>{{ resume.original_filename }}</td>
+            <td class="text-end">
+              {% for fmt in formats %}
+                <a href="{{ url_for('reports.resume_report', resume_id=resume.id, fmt=fmt) }}" class="btn btn-sm btn-outline-secondary">{{ fmt|upper }}</a>
+              {% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted small mb-0">No processed resumes yet.</p>
+  {% endif %}
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Match reports</h6>
+  {% if match_reports %}
+    <table class="table table-sm align-middle mb-0">
+      <tbody>
+        {% for report in match_reports %}
+          <tr>
+            <td>
+              {{ report.resume.original_filename }} vs. {{ report.job.title or "Untitled" }}
+              {% if report.overall_score is not none %}<span class="text-muted small">({{ report.overall_score }}%)</span>{% endif %}
+            </td>
+            <td class="text-end">
+              {% for fmt in formats %}
+                <a href="{{ url_for('reports.match_report', report_id=report.id, fmt=fmt) }}" class="btn btn-sm btn-outline-secondary">{{ fmt|upper }}</a>
+              {% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted small mb-0">No match reports yet.</p>
+  {% endif %}
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Skill gap report</h6>
+  <div>
+    {% for fmt in formats %}
+      <a href="{{ url_for('reports.skill_gap_report', fmt=fmt) }}" class="btn btn-sm btn-outline-secondary">{{ fmt|upper }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card p-3 mb-4">
+  <h6 class="mb-3">Career roadmap</h6>
+  {% if roadmap %}
+    <div>
+      {% for fmt in formats %}
+        <a href="{{ url_for('reports.roadmap_report', fmt=fmt) }}" class="btn btn-sm btn-outline-secondary">{{ fmt|upper }}</a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted small mb-0">No roadmap generated yet.</p>
+  {% endif %}
+</div>
+
+<div class="card p-3">
+  <h6 class="mb-3">Market analysis snapshot</h6>
+  <div>
+    {% for fmt in formats %}
+      <a href="{{ url_for('reports.market_report', fmt=fmt) }}" class="btn btn-sm btn-outline-secondary">{{ fmt|upper }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

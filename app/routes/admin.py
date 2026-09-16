@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 
 from app.extensions import db
@@ -12,6 +12,7 @@ from app.forms import (
 )
 from app.models import SkillCategory, Skill, SkillAlias, UserSkill, LearningResource
 from app.services.auth.decorators import admin_required
+from app.services.auth.audit import log_event
 from app.services.skills.normalizer import normalize_text
 from app.services.market.data_import import parse_csv, parse_xlsx, parse_json, import_jobs, ImportParseError
 from app.services.ai import get_ai_manager
@@ -266,3 +267,113 @@ def delete_learning_resource(resource_id):
     db.session.commit()
     flash("Learning resource removed.", "info")
     return redirect(url_for("admin.learning_resources"))
+
+
+# ==================================================
+# Phase 12 — user management, audit log, system overview
+# ==================================================
+
+@admin_bp.route("/users")
+@login_required
+@admin_required
+def users():
+    from app.models import User
+
+    query = request.args.get("q", "", type=str).strip()
+    users_query = User.query
+    if query:
+        users_query = users_query.filter(User.email.ilike(f"%{query}%"))
+    all_users = users_query.order_by(User.created_at.desc()).limit(200).all()
+    return render_template("admin/users.html", users=all_users, query=query)
+
+
+@admin_bp.route("/users/<int:user_id>/toggle-active", methods=["POST"])
+@login_required
+@admin_required
+def toggle_user_active(user_id):
+    from app.models import User
+
+    user = User.query.get_or_404(user_id)
+
+    # An admin disabling themselves would immediately lock themselves out
+    # with no way back in through the UI — block it explicitly rather
+    # than letting it happen and calling it the admin's fault.
+    if user.id == current_user.id:
+        flash("You can't disable your own account.", "danger")
+        return redirect(url_for("admin.users"))
+
+    user.is_active_account = not user.is_active_account
+    db.session.commit()
+
+    action = "user_enabled" if user.is_active_account else "user_disabled"
+    log_event("admin", action, description=f"user #{user.id} ({user.email})")
+    flash(f"{user.email} {'enabled' if user.is_active_account else 'disabled'}.", "success")
+    return redirect(url_for("admin.users"))
+
+
+@admin_bp.route("/users/<int:user_id>/toggle-admin", methods=["POST"])
+@login_required
+@admin_required
+def toggle_user_admin(user_id):
+    from app.models import User
+
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        flash("You can't change your own admin status.", "danger")
+        return redirect(url_for("admin.users"))
+
+    user.is_admin = not user.is_admin
+    db.session.commit()
+
+    action = "admin_granted" if user.is_admin else "admin_revoked"
+    log_event("admin", action, description=f"user #{user.id} ({user.email})")
+    flash(f"Admin rights {'granted to' if user.is_admin else 'revoked from'} {user.email}.", "success")
+    return redirect(url_for("admin.users"))
+
+
+@admin_bp.route("/audit-log")
+@login_required
+@admin_required
+def audit_log():
+    from app.models import ActivityLog
+
+    category = request.args.get("category", "", type=str).strip()
+    query = ActivityLog.query
+    if category:
+        query = query.filter_by(category=category)
+    entries = query.order_by(ActivityLog.created_at.desc()).limit(200).all()
+    return render_template("admin/audit_log.html", entries=entries, category=category)
+
+
+@admin_bp.route("/overview")
+@login_required
+@admin_required
+def overview():
+    from app.models import (
+        User, Resume, Job, JobAnalysis, SavedJob, AIConversation,
+        CareerRoadmap, ActivityLog, Skill,
+    )
+
+    stats = {
+        "users_total": User.query.count(),
+        "users_verified": User.query.filter_by(is_email_verified=True).count(),
+        "users_disabled": User.query.filter_by(is_active_account=False).count(),
+        "admins": User.query.filter_by(is_admin=True).count(),
+        "resumes": Resume.query.count(),
+        "jobs": Job.query.count(),
+        "match_reports": JobAnalysis.query.count(),
+        "saved_jobs": SavedJob.query.count(),
+        "conversations": AIConversation.query.count(),
+        "roadmaps": CareerRoadmap.query.count(),
+        "skills": Skill.query.count(),
+        "user_suggested_skills": Skill.query.filter_by(is_user_suggested=True).count(),
+        "audit_entries": ActivityLog.query.count(),
+    }
+    recent_failed_logins = (
+        ActivityLog.query.filter_by(action="login_failed")
+        .order_by(ActivityLog.created_at.desc())
+        .limit(10)
+        .all()
+    )
+    return render_template("admin/overview.html", stats=stats, recent_failed_logins=recent_failed_logins)

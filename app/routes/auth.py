@@ -21,6 +21,7 @@ from app.forms import (
 )
 from app.models import User, EmailVerificationToken, PasswordResetToken
 from app.services.email.mailer import send_verification_email, send_password_reset_email
+from app.services.auth.audit import log_event
 
 logger = logging.getLogger("jobmarket_ai.auth")
 
@@ -68,6 +69,7 @@ def register():
 
         _issue_verification_email(user)
         logger.info("New registration: %s", email)
+        log_event("auth", "register", user=user)
 
         flash(
             "Account created! Check your email for a verification link.",
@@ -126,16 +128,19 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if not user or not user.check_password(form.password.data):
+            log_event("auth", "login_failed", description=f"attempt for {email}")
             flash("Invalid email or password.", "danger")
             return render_template("auth/login.html", form=form)
 
         if not user.is_active_account:
+            log_event("security", "login_disabled_account", user=user)
             flash("This account has been disabled. Contact support.", "danger")
             return render_template("auth/login.html", form=form)
 
         login_user(user, remember=form.remember_me.data)
         user.last_login_at = datetime.utcnow()
         db.session.commit()
+        log_event("auth", "login_success", user=user)
 
         if not user.is_email_verified:
             flash("Please verify your email to unlock all features.", "warning")
@@ -190,6 +195,7 @@ def reset_password(token):
         for other in user.reset_tokens.filter_by(used=False):
             other.used = True
         db.session.commit()
+        log_event("security", "password_reset_completed", user=user)
         flash("Your password has been reset. You can now log in.", "success")
         return redirect(url_for("auth.login"))
 
@@ -206,6 +212,7 @@ def change_password():
             return render_template("auth/change_password.html", form=form)
         current_user.set_password(form.new_password.data)
         db.session.commit()
+        log_event("security", "password_changed")
         flash("Your password has been changed.", "success")
         return redirect(url_for("dashboard.index"))
     return render_template("auth/change_password.html", form=form)
@@ -222,6 +229,7 @@ def delete_account():
         # current_user is a LocalProxy that re-resolves on every access, so
         # unwrap the real model instance before logout_user() clears it.
         user = current_user._get_current_object()
+        log_event("data", "account_deleted", description=f"user #{user.id}", user=user)
         logout_user()
         db.session.delete(user)
         db.session.commit()

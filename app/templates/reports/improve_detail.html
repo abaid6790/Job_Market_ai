@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Resume Improvement — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Resume Improvement</h2>
+    <p class="text-muted mb-0">
+      {{ resume.original_filename }}
+      {% if job %} · against "{{ job.title or "Untitled job" }}"{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('reports.improve_index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<div class="alert alert-light border small">
+  These suggestions only ever reference content already in your resume or real gaps against a job you analyzed — nothing is invented.
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Section completeness</h6>
+      {% if analysis.missing_sections %}
+        <p class="small text-warning mb-0">Missing: {{ analysis.missing_sections|join(", ") }}</p>
+      {% else %}
+        <p class="small text-success mb-0">All expected sections detected.</p>
+      {% endif %}
+    </div>
+
+    {% if analysis.missing_skills %}
+      <div class="card p-3 mb-4">
+        <h6 class="mb-3">Skills this job wants that aren't on your resume</h6>
+        {% if analysis.missing_skills.critical %}
+          <p class="small mb-1"><strong class="text-danger">Required:</strong> {{ analysis.missing_skills.critical|join(", ") }}</p>
+        {% endif %}
+        {% if analysis.missing_skills.important %}
+          <p class="small mb-0"><strong class="text-warning">Preferred:</strong> {{ analysis.missing_skills.important|join(", ") }}</p>
+        {% endif %}
+        {% if not analysis.missing_skills.critical and not analysis.missing_skills.important %}
+          <p class="small text-success mb-0">No missing skills detected for this job.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if analysis.missing_keywords %}
+      <div class="card p-3">
+        <h6 class="mb-3">Keywords from the job not found in your resume</h6>
+        <p class="small text-muted mb-0">{{ analysis.missing_keywords|join(", ") }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3 mb-4">
+      <h6 class="mb-3">Bullet points worth strengthening ({{ analysis.weak_bullets|length }})</h6>
+      {% if analysis.weak_bullets %}
+        {% for wb in analysis.weak_bullets[:10] %}
+          <div class="border-bottom pb-2 mb-2">
+            <p class="small mb-1">"{{ wb.text }}"</p>
+            <ul class="small text-muted mb-0">
+              {% for issue in wb.issues %}<li>{{ issue }}</li>{% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="small text-success mb-0">No weak bullet points detected.</p>
+      {% endif %}
+    </div>
+
+    <div class="card p-3">
+      <h6 class="mb-3">AI-enhanced suggestions</h6>
+      {% if ai_result %}
+        <div class="small" style="white-space:pre-line;">{{ ai_result.text }}</div>
+      {% else %}
+        {% if not provider_available %}
+          <p class="text-muted small">No AI provider is configured — the analysis above works without one.</p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('reports.improve_ai', resume_id=resume.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% if job %}<input type="hidden" name="job_id" value="{{ job.id }}">{% endif %}
+          <button type="submit" class="btn btn-sm btn-outline-primary">Get AI suggestions</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

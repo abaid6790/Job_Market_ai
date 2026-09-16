@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Job Clustering — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Job Clustering</h2>
+    <p class="text-muted mb-0">Analyzed jobs grouped by text similarity.</p>
+  </div>
+  <a href="{{ url_for('advanced.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+{% if not result.available %}
+  <div class="alert alert-info">{{ result.reason }}</div>
+{% else %}
+  <div class="alert alert-light border small">{{ result.method_note }}</div>
+  <p class="text-muted small mb-3">{{ result.cluster_count }} clusters from {{ result.total_jobs }} jobs.</p>
+  <div class="row g-3">
+    {% for c in result.clusters %}
+      <div class="col-md-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between">
+            <h6 class="mb-2">Cluster {{ loop.index }}</h6>
+            <span class="badge text-bg-secondary">{{ c.size }} job{{ "s" if c.size != 1 else "" }}</span>
+          </div>
+          <p class="small mb-2"><strong>Distinctive terms:</strong> {{ c.top_terms|join(", ") }}</p>
+          {% if c.top_skills %}
+            <p class="small mb-2"><strong>Common skills:</strong> {{ c.top_skills|join(", ") }}</p>
+          {% endif %}
+          <p class="small text-muted mb-0"><strong>Example roles:</strong> {{ c.sample_titles|join("; ") }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

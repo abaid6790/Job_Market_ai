@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Compare Resumes — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Compare Resume Versions</h2>
+    <p class="text-muted mb-0">Select two or more of your resumes.</p>
+  </div>
+  <a href="{{ url_for('advanced.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+{% if resumes|length < 2 %}
+  <div class="alert alert-info">
+    You need at least two processed resumes to compare.
+    <a href="{{ url_for('resume.index') }}" class="alert-link">Upload another</a>.
+  </div>
+{% else %}
+  <div class="card p-4 mb-4">
+    <form method="GET" action="{{ url_for('advanced.compare') }}">
+      <div class="mb-3">
+        <label class="form-label">Resumes</label>
+        {% for r in resumes %}
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="resume_id" value="{{ r.id }}"
+                   id="r{{ r.id }}" {% if r.id in selected_ids %}checked{% endif %}>
+            <label class="form-check-label" for="r{{ r.id }}">{{ r.original_filename }}</label>
+          </div>
+        {% endfor %}
+      </div>
+      {% if jobs %}
+        <div class="mb-3">
+          <label class="form-label" for="job_id">Compare against a job (optional)</label>
+          <select class="form-select" name="job_id" id="job_id">
+            <option value="">— none —</option>
+            {% for j in jobs %}
+              <option value="{{ j.id }}" {% if selected_job_id == j.id %}selected{% endif %}>{{ j.title or "Untitled" }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">Compare</button>
+    </form>
+  </div>
+{% endif %}
+
+{% if result %}
+  {% if not result.available %}
+    <div class="alert alert-info">{{ result.reason }}</div>
+  {% else %}
+    <div class="alert alert-light border small">{{ result.disclaimer }}</div>
+    <div class="card p-3 mb-4">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Resume</th><th>Skills</th><th>Experience</th><th>Education</th><th>Sections</th>
+            {% if result.job %}<th>Overall</th><th>Skills score</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in result.rows %}
+            <tr {% if result.best_overall_resume_id == row.resume.id %}class="table-success"{% endif %}>
+              <td>
+                {{ row.resume.original_filename }}
+                {% if result.best_overall_resume_id == row.resume.id %}<span class="badge text-bg-success">Best fit</span>{% endif %}
+              </td>
+              <td>{{ row.skill_count }}</td>
+              <td>{{ row.experience_count }}</td>
+              <td>{{ row.education_count }}</td>
+              <td>{{ row.section_count }}</td>
+              {% if result.job %}
+                <td>{{ (row.scores.overall ~ "%") if row.scores.overall is not none else "—" }}</td>
+                <td>{{ (row.scores.skills ~ "%") if row.scores.skills is not none else "—" }}</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h6 class="mb-2">Skills in every version ({{ result.shared_skills|length }})</h6>
+          <p class="small text-muted mb-0">{{ result.shared_skills|join(", ") or "None shared." }}</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h6 class="mb-2">Unique to one version</h6>
+          {% for row in result.rows %}
+            {% if row.unique_skills %}
+              <p class="small mb-1"><strong>{{ row.resume.original_filename }}:</strong> {{ row.unique_skills|join(", ") }}</p>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+{% endblock %}

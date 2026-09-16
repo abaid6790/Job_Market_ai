@@ -28,10 +28,12 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('matching.index') }}">Match Analysis</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('roadmap.index') }}">Career Roadmap</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('assistant.index') }}">AI Assistant</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('reports.index') }}">Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('advanced.index') }}">Insights+</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('market.dashboard') }}">Market Insights</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('profile.index') }}">My Profile</a></li>
             {% if current_user.is_admin %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.taxonomy') }}">Admin</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.overview') }}">Admin</a></li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.change_password') }}">Change Password</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>

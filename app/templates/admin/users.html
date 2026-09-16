@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h2>Users</h2>
+  <a href="{{ url_for('admin.overview') }}" class="btn btn-outline-secondary btn-sm">Admin overview</a>
+</div>
+
+<form method="GET" action="{{ url_for('admin.users') }}" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="q" class="form-control form-control-sm" placeholder="Search by email" value="{{ query }}">
+  </div>
+  <div class="col-auto"><button type="submit" class="btn btn-sm btn-primary">Search</button></div>
+</form>
+
+<div class="card p-3">
+  <table class="table table-sm align-middle mb-0">
+    <thead><tr><th>Email</th><th>Name</th><th>Verified</th><th>Status</th><th>Admin</th><th>Joined</th><th></th></tr></thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.email }}</td>
+          <td>{{ u.name }}</td>
+          <td>{% if u.is_email_verified %}<span class="text-success">Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+          <td>
+            {% if u.is_active_account %}<span class="badge text-bg-success">Active</span>
+            {% else %}<span class="badge text-bg-danger">Disabled</span>{% endif %}
+          </td>
+          <td>{% if u.is_admin %}<span class="badge text-bg-primary">Admin</span>{% else %}—{% endif %}</td>
+          <td class="text-muted small">{{ u.created_at.strftime("%Y-%m-%d") }}</td>
+          <td class="text-end">
+            {% if u.id != current_user.id %}
+              <form method="POST" action="{{ url_for('admin.toggle_user_active', user_id=u.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-{{ 'danger' if u.is_active_account else 'success' }}">
+                  {{ "Disable" if u.is_active_account else "Enable" }}
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.toggle_user_admin', user_id=u.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                  {{ "Revoke admin" if u.is_admin else "Make admin" }}
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small">(you)</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

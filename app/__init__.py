@@ -46,6 +46,8 @@ def create_app(config_name: str = None) -> Flask:
     from app.routes.saved_jobs import saved_jobs_bp
     from app.routes.assistant import assistant_bp
     from app.routes.roadmap import roadmap_bp
+    from app.routes.reports import reports_bp
+    from app.routes.advanced import advanced_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -60,8 +62,45 @@ def create_app(config_name: str = None) -> Flask:
     app.register_blueprint(saved_jobs_bp)
     app.register_blueprint(assistant_bp)
     app.register_blueprint(roadmap_bp)
+    app.register_blueprint(reports_bp)
+    app.register_blueprint(advanced_bp)
+
+
+    # --- Security headers (Phase 12) ---
+    @app.after_request
+    def set_security_headers(response):
+        # Defense-in-depth headers. CSP allows the CDNs this app actually
+        # uses (Bootstrap, Chart.js) plus 'unsafe-inline' for the small
+        # inline scripts/styles in templates — tightening that further
+        # would require moving every inline block to a static file, which
+        # is a worthwhile follow-up but not a silent change to make here.
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault(
+            "Permissions-Policy", "geolocation=(), microphone=(), camera=()"
+        )
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' data:; "
+            "font-src 'self' https://cdn.jsdelivr.net data:; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'",
+        )
+        if not app.config.get("DEBUG"):
+            response.headers.setdefault(
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+            )
+        return response
 
     # --- Error handlers ---
+    @app.errorhandler(403)
+    def forbidden(_e):
+        return render_template("errors/403.html"), 403
+
     @app.errorhandler(404)
     def not_found(_e):
         return render_template("errors/404.html"), 404

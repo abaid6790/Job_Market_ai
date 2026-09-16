@@ -14,6 +14,7 @@ from app.models.ai import AIUsage, AICacheEntry
 from app.models.saved_job import SavedJob
 from app.models.assistant import AIConversation, AIMessage
 from app.models.roadmap import CareerRoadmap, RoadmapSkill, LearningResource, Recommendation
+from app.models.activity import ActivityLog
 
 __all__ = [
     "User",
@@ -44,4 +45,5 @@ __all__ = [
     "RoadmapSkill",
     "LearningResource",
     "Recommendation",
+    "ActivityLog",
 ]

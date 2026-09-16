@@ -25,6 +25,15 @@ def _extract_keywords(text: str, limit: int = _DEFAULT_KEYWORD_LIMIT) -> list[st
 
 
 def keyword_coverage(job_text: str, resume_text: str) -> float | None:
+    detail = keyword_coverage_detail(job_text, resume_text)
+    return detail["score"] if detail else None
+
+
+def keyword_coverage_detail(job_text: str, resume_text: str) -> dict | None:
+    """Like keyword_coverage(), but also returns which specific keywords
+    were found vs. missing — needed for ATS analysis and resume
+    improvement suggestions to point at concrete, real terms rather than
+    just a score."""
     if not job_text or not job_text.strip() or not resume_text or not resume_text.strip():
         return None
 
@@ -33,5 +42,11 @@ def keyword_coverage(job_text: str, resume_text: str) -> float | None:
         return None
 
     resume_lower = resume_text.lower()
-    found = sum(1 for kw in keywords if kw in resume_lower)
-    return round((found / len(keywords)) * 100, 1)
+    matched = [kw for kw in keywords if kw in resume_lower]
+    missing = [kw for kw in keywords if kw not in resume_lower]
+
+    return {
+        "score": round((len(matched) / len(keywords)) * 100, 1),
+        "matched": matched,
+        "missing": missing,
+    }

@@ -333,3 +333,49 @@ def test_retry_button_actually_works_with_csrf_enabled():
     )
     assert resp.status_code == 200
     assert b"re-processed" in resp.data.lower()
+
+
+def test_reports_pages_forms_have_csrf():
+    app, client = _make_csrf_enabled_client()
+    with app.app_context():
+        seed_taxonomy()
+    _register_verify_login(app, client)
+
+    with open("tests/fixtures/sample_resume.txt", "rb") as fh:
+        upload_page = client.get("/resume/").data.decode()
+        csrf = _extract_csrf(upload_page)
+        client.post(
+            "/resume/upload",
+            data={"csrf_token": csrf, "file": (fh, "sample_resume.txt")},
+            content_type="multipart/form-data",
+            follow_redirects=True,
+        )
+
+    # Reports index and ATS index are link-only pages (no POST forms).
+    reports_page = client.get("/reports/").data.decode()
+    _assert_all_post_forms_have_csrf(reports_page, "reports index", require_forms=False)
+
+    # The improvement detail page has a real POST form for AI suggestions.
+    improve_page = client.get("/reports/improve/1").data.decode()
+    _assert_all_post_forms_have_csrf(improve_page, "resume improvement detail")
+
+
+def test_admin_user_management_forms_have_csrf():
+    app, client = _make_csrf_enabled_client()
+    with app.app_context():
+        seed_taxonomy()
+    _register_verify_login(app, client)
+
+    with app.app_context():
+        from app.models import User
+        u = User.query.filter_by(email="alice@example.com").first()
+        u.is_admin = True
+        db.session.commit()
+
+    users_page = client.get("/admin/users").data.decode()
+    # Only the current admin exists, and self-targeting forms are
+    # intentionally not rendered — so require_forms=False here.
+    _assert_all_post_forms_have_csrf(users_page, "admin users", require_forms=False)
+
+    overview_page = client.get("/admin/overview").data.decode()
+    _assert_all_post_forms_have_csrf(overview_page, "admin overview", require_forms=False)

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}ATS Analysis — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">ATS Analysis</h2>
+    <p class="text-muted mb-0">Pick a match report to see an estimated ATS-style breakdown.</p>
+  </div>
+  <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary btn-sm">Back to reports</a>
+</div>
+
+{% if match_reports %}
+  <div class="card p-3">
+    <table class="table table-sm align-middle mb-0">
+      <tbody>
+        {% for report in match_reports %}
+          <tr>
+            <td>{{ report.resume.original_filename }} vs. {{ report.job.title or "Untitled" }}</td>
+            <td class="text-end">
+              <a href="{{ url_for('reports.ats_detail', report_id=report.id) }}" class="btn btn-sm btn-outline-primary">Analyze</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="alert alert-info">
+    You need at least one <a href="{{ url_for('matching.index') }}" class="alert-link">match report</a> first —
+    ATS analysis compares a specific resume against a specific job.
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Skill Demand Forecast — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Skill Demand Forecast</h2>
+    <p class="text-muted mb-0">A short-horizon projection from this deployment's own collected data.</p>
+  </div>
+  <a href="{{ url_for('advanced.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+{% if not result.available %}
+  <div class="alert alert-info">{{ result.reason }}</div>
+{% else %}
+  <div class="alert alert-warning small">{{ result.method_note }}</div>
+  <p class="text-muted small mb-3">
+    Based on {{ result.months_used|length }} months:
+    {% for m in result.months_used %}{{ m }} ({{ result.jobs_per_month[m] }} jobs){% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h6 class="text-success mb-3">Projected to rise</h6>
+        {% if result.rising %}
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Skill</th><th>Now</th><th>Next</th><th>Δ</th><th>Volatility</th></tr></thead>
+            <tbody>
+              {% for p in result.rising %}
+                <tr>
+                  <td>{{ p.skill_name }}</td>
+                  <td>{{ p.current_demand }}%</td>
+                  <td>{{ p.projected_demand }}%</td>
+                  <td class="text-success">+{{ p.change }}</td>
+                  <td class="text-muted small">±{{ p.volatility }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="text-muted small mb-0">None projected to rise.</p>{% endif %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h6 class="text-danger mb-3">Projected to fall</h6>
+        {% if result.falling %}
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Skill</th><th>Now</th><th>Next</th><th>Δ</th><th>Volatility</th></tr></thead>
+            <tbody>
+              {% for p in result.falling %}
+                <tr>
+                  <td>{{ p.skill_name }}</td>
+                  <td>{{ p.current_demand }}%</td>
+                  <td>{{ p.projected_demand }}%</td>
+                  <td class="text-danger">{{ p.change }}</td>
+                  <td class="text-muted small">±{{ p.volatility }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="text-muted small mb-0">None projected to fall.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
