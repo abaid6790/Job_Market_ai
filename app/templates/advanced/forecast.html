@@ -23,7 +23,8 @@
       <div class="card p-3">
         <h6 class="text-success mb-3">Projected to rise</h6>
         {% if result.rising %}
-          <table class="table table-sm mb-0">
+          <div class="table-responsive">
+<table class="table table-sm mb-0">
             <thead><tr><th>Skill</th><th>Now</th><th>Next</th><th>Δ</th><th>Volatility</th></tr></thead>
             <tbody>
               {% for p in result.rising %}
@@ -37,6 +38,7 @@
               {% endfor %}
             </tbody>
           </table>
+</div>
         {% else %}<p class="text-muted small mb-0">None projected to rise.</p>{% endif %}
       </div>
     </div>
@@ -44,7 +46,8 @@
       <div class="card p-3">
         <h6 class="text-danger mb-3">Projected to fall</h6>
         {% if result.falling %}
-          <table class="table table-sm mb-0">
+          <div class="table-responsive">
+<table class="table table-sm mb-0">
             <thead><tr><th>Skill</th><th>Now</th><th>Next</th><th>Δ</th><th>Volatility</th></tr></thead>
             <tbody>
               {% for p in result.falling %}
@@ -58,6 +61,7 @@
               {% endfor %}
             </tbody>
           </table>
+</div>
         {% else %}<p class="text-muted small mb-0">None projected to fall.</p>{% endif %}
       </div>
     </div>

@@ -18,7 +18,8 @@
 
 {% if resumes %}
   <div class="card p-3">
-    <table class="table align-middle mb-0">
+    <div class="table-responsive">
+<table class="table align-middle mb-0">
       <thead>
         <tr>
           <th>File</th>
@@ -68,6 +69,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   </div>
 {% else %}
   <p class="text-muted">No resumes uploaded yet.</p>

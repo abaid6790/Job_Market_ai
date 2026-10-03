@@ -1,43 +1,24 @@
 {% extends "base.html" %}
 {% block title %}JobMarket AI — Career Intelligence Platform{% endblock %}
 {% block content %}
-<section class="hero">
-  <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-4" style="background:var(--brand-soft);color:var(--brand);font-size:.75rem;font-weight:700;letter-spacing:.03em;">
-    <i class="bi bi-stars"></i> AI-POWERED CAREER INTELLIGENCE
+<section class="hero text-center">
+  <div class="eyebrow">AI-POWERED CAREER INTELLIGENCE</div>
+  <h1>Turn your career data into your next opportunity.</h1>
+  <p class="lead text-muted mb-4 mx-auto" style="max-width:720px;">Analyze your resume, understand the job market, discover skill gaps, and build a practical career roadmap from one intelligent workspace.</p>
+  <div class="d-flex flex-wrap justify-content-center gap-2">
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg rounded-pill px-4">Start for free <span class="ms-1">→</span></a>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Explore workspace</a>
   </div>
-  <h1>Build the career the job market is asking for.</h1>
-  <p class="lead text-muted mx-auto mb-4">
-    Turn your resume and real job descriptions into actionable career intelligence — from skill gaps and job matching to market insights and a personalized roadmap.
-  </p>
-  <div class="d-flex justify-content-center flex-wrap gap-2">
-    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Start for free <i class="bi bi-arrow-right ms-1"></i></a>
-    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">Sign in</a>
-  </div>
+  <div class="d-flex justify-content-center flex-wrap gap-4 mt-4 small text-muted"><span>✦ AI-assisted analysis</span><span>◈ Skill intelligence</span><span>✓ Personal workspace</span></div>
 </section>
 
-<section class="container-xl pb-5">
-  <div class="row g-3 g-lg-4">
-    <div class="col-md-4">
-      <div class="card h-100 p-4">
-        <div class="mb-4 d-inline-grid" style="place-items:center;width:44px;height:44px;border-radius:12px;background:#eef2ff;color:#4f46e5;"><i class="bi bi-file-earmark-text fs-5"></i></div>
-        <h5>Resume Intelligence</h5>
-        <p class="text-muted mb-0">Extract skills, experience, education and career signals from your resume automatically.</p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card h-100 p-4">
-        <div class="mb-4 d-inline-grid" style="place-items:center;width:44px;height:44px;border-radius:12px;background:#f3e8ff;color:#7c3aed;"><i class="bi bi-bullseye fs-5"></i></div>
-        <h5>Smarter Job Matching</h5>
-        <p class="text-muted mb-0">Compare your profile with analyzed jobs and understand exactly where you match or fall short.</p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card h-100 p-4">
-        <div class="mb-4 d-inline-grid" style="place-items:center;width:44px;height:44px;border-radius:12px;background:#ecfdf3;color:#059669;"><i class="bi bi-signpost-split fs-5"></i></div>
-        <h5>Personal Career Roadmap</h5>
-        <p class="text-muted mb-0">Turn skill gaps into a practical learning path built around your target role and market demand.</p>
-      </div>
-    </div>
-  </div>
+<section class="row g-3 mt-4">
+  <div class="col-md-4"><div class="card h-100 p-4"><div class="metric-icon purple mb-3">▣</div><h5>Resume Intelligence</h5><p class="text-muted small mb-0">Turn your resume into structured career signals, skills, experience, and actionable insights.</p></div></div>
+  <div class="col-md-4"><div class="card h-100 p-4"><div class="metric-icon cyan mb-3">◌</div><h5>Market Intelligence</h5><p class="text-muted small mb-0">Explore roles, skills, and market signals so you can understand what opportunities are asking for.</p></div></div>
+  <div class="col-md-4"><div class="card h-100 p-4"><div class="metric-icon gold mb-3">↗</div><h5>Career Roadmap</h5><p class="text-muted small mb-0">Connect your current profile to skill gaps and a practical learning path toward your target role.</p></div></div>
+</section>
+
+<section class="card p-4 p-lg-5 mt-4 overflow-hidden" style="background:linear-gradient(110deg,var(--surface),rgba(99,91,255,.06));">
+  <div class="row align-items-center g-4"><div class="col-lg-7"><div class="eyebrow">ONE CAREER WORKSPACE</div><h2 class="fw-bold mb-2" style="letter-spacing:-.04em;">From resume to roadmap, without the clutter.</h2><p class="text-muted mb-0">JobMarket AI brings your profile, job analysis, matching, market insights, reports, and AI assistant together in a single focused workspace.</p></div><div class="col-lg-5"><div class="d-grid gap-2"><div class="tool-card"><span>⌕</span><div><strong>Analyze opportunities</strong><small>Understand jobs and requirements.</small></div></div><div class="tool-card"><span>✦</span><div><strong>Ask your AI career assistant</strong><small>Get context-aware guidance from your workspace.</small></div></div></div></div></div>
 </section>
 {% endblock %}

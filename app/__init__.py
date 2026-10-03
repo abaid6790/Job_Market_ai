@@ -4,7 +4,7 @@ import os
 from flask import Flask, render_template, redirect, url_for, flash, request
 
 from config import config_by_name
-from app.extensions import db, login_manager, csrf, limiter
+from app.extensions import db, login_manager, csrf, limiter, migrate
 
 
 def create_app(config_name: str = None) -> Flask:
@@ -19,6 +19,7 @@ def create_app(config_name: str = None) -> Flask:
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
+    migrate.init_app(app, db)
 
     # --- AI provider manager (Phase 7) ---
     from app.services.ai.manager import AIProviderManager
@@ -136,17 +137,43 @@ def create_app(config_name: str = None) -> Flask:
             f"+{stats['skills_added']} skills, +{stats['aliases_added']} aliases."
         )
 
-    # --- DB bootstrap for dev/test (Phase-1 scope; migrations come later) ---
+    # --- DB bootstrap for dev/test (Phase 14: migrations now manage schema
+    # in production — see migrations/ and docs/DEPLOYMENT.md. This convenience
+    # create_all() is skipped when running `flask db ...` so Alembic's
+    # autogenerate can see a true diff against an empty database, and is
+    # otherwise kept for zero-friction local dev/test on SQLite.) ---
+    import sys
+
+    running_migration_command = len(sys.argv) > 1 and sys.argv[1] == "db"
+
     with app.app_context():
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
         os.makedirs(app.config["LOG_DIR"], exist_ok=True)
-        db.create_all()
-        if config_name != "testing":
-            from app.services.skills.seed import seed_taxonomy
-            from app.services.roadmap.learning_resources import seed_learning_resources
+        if not running_migration_command:
+            db.create_all()
+            if config_name != "testing":
+                from app.services.skills.seed import seed_taxonomy
+                from app.services.roadmap.learning_resources import seed_learning_resources
 
-            seed_taxonomy()
-            seed_learning_resources()
+                seed_taxonomy()
+                seed_learning_resources()
+
+    # --- Health check for load balancers / uptime monitors ---
+    @app.route("/health")
+    def health_check():
+        from flask import jsonify
+        from sqlalchemy import text
+
+        checks = {"database": False}
+        status_code = 200
+        try:
+            db.session.execute(text("SELECT 1"))
+            checks["database"] = True
+        except Exception:
+            status_code = 503
+
+        overall = "ok" if all(checks.values()) else "degraded"
+        return jsonify({"status": overall, "checks": checks}), status_code
 
     return app
 

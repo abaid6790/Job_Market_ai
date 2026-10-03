@@ -53,7 +53,8 @@
 {% if application_stage_jobs %}
   <div class="card p-3">
     <h6 class="mb-3">Applications</h6>
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <thead><tr><th>Job</th><th>Status</th><th>Applied</th><th>Interview</th></tr></thead>
       <tbody>
         {% for sj in application_stage_jobs %}
@@ -66,6 +67,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   </div>
 {% endif %}
 {% endblock %}

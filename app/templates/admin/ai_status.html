@@ -65,7 +65,8 @@
       <div class="col-md-3"><strong>{{ stats.avg_response_time_ms or "—" }}ms</strong><br>Avg response time</div>
     </div>
     {% if stats.by_provider %}
-      <table class="table table-sm mt-3 mb-0">
+      <div class="table-responsive">
+<table class="table table-sm mt-3 mb-0">
         <thead><tr><th>Provider</th><th>Success</th><th>Failure</th></tr></thead>
         <tbody>
           {% for provider, counts in stats.by_provider.items() %}
@@ -73,6 +74,7 @@
           {% endfor %}
         </tbody>
       </table>
+</div>
     {% endif %}
   {% else %}
     <p class="text-muted small mb-0">No AI requests logged yet.</p>
@@ -82,7 +84,8 @@
 {% if recent_usage %}
   <div class="card p-3">
     <h6 class="mb-3">Recent requests</h6>
-    <table class="table table-sm mb-0">
+    <div class="table-responsive">
+<table class="table table-sm mb-0">
       <thead><tr><th>Time</th><th>Provider</th><th>Method</th><th>Status</th><th>ms</th></tr></thead>
       <tbody>
         {% for u in recent_usage %}
@@ -96,6 +99,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   </div>
 {% endif %}
 {% endblock %}

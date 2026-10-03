@@ -11,7 +11,8 @@
 
 {% if match_reports %}
   <div class="card p-3">
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <tbody>
         {% for report in match_reports %}
           <tr>
@@ -23,6 +24,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   </div>
 {% else %}
   <div class="alert alert-info">

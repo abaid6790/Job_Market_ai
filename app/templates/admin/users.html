@@ -14,7 +14,8 @@
 </form>
 
 <div class="card p-3">
-  <table class="table table-sm align-middle mb-0">
+  <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
     <thead><tr><th>Email</th><th>Name</th><th>Verified</th><th>Status</th><th>Admin</th><th>Joined</th><th></th></tr></thead>
     <tbody>
       {% for u in users %}
@@ -50,5 +51,6 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 </div>
 {% endblock %}

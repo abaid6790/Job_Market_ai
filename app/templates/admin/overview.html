@@ -37,7 +37,8 @@
 <div class="card p-3">
   <h6 class="mb-3">Recent failed logins</h6>
   {% if recent_failed_logins %}
-    <table class="table table-sm mb-0">
+    <div class="table-responsive">
+<table class="table table-sm mb-0">
       <tbody>
         {% for e in recent_failed_logins %}
           <tr>
@@ -48,6 +49,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   {% else %}
     <p class="text-muted small mb-0">No failed login attempts recorded.</p>
   {% endif %}

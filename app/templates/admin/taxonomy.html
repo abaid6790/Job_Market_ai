@@ -38,7 +38,8 @@
 {% if uncategorized %}
 <div class="card p-3 mb-4 border-warning">
   <h6 class="text-warning">Pending review — user-suggested skills ({{ uncategorized|length }})</h6>
-  <table class="table table-sm align-middle mb-0">
+  <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
     <thead><tr><th>Skill</th><th>Assign category</th><th></th></tr></thead>
     <tbody>
       {% for skill in uncategorized %}
@@ -61,6 +62,7 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 </div>
 {% endif %}
 

@@ -18,7 +18,8 @@
 
 <div class="card p-3">
   {% if entries %}
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <thead><tr><th>Time</th><th>Category</th><th>Action</th><th>Actor</th><th>IP</th><th>Detail</th></tr></thead>
       <tbody>
         {% for e in entries %}
@@ -33,6 +34,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   {% else %}
     <p class="text-muted small mb-0">No audit entries yet.</p>
   {% endif %}

@@ -12,7 +12,8 @@
 <div class="card p-3 mb-4">
   <h6 class="mb-3">Resume analysis reports</h6>
   {% if resumes %}
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <tbody>
         {% for resume in resumes %}
           <tr>
@@ -26,6 +27,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   {% else %}
     <p class="text-muted small mb-0">No processed resumes yet.</p>
   {% endif %}
@@ -34,7 +36,8 @@
 <div class="card p-3 mb-4">
   <h6 class="mb-3">Match reports</h6>
   {% if match_reports %}
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <tbody>
         {% for report in match_reports %}
           <tr>
@@ -51,6 +54,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   {% else %}
     <p class="text-muted small mb-0">No match reports yet.</p>
   {% endif %}

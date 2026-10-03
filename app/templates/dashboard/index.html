@@ -1,75 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — {{ app_name }}{% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
-  <div>
-    <div class="eyebrow text-primary mb-1">YOUR WORKSPACE</div>
-    <h2 class="mb-1">Welcome back, {{ user.name }} <span style="font-family:inherit;">👋</span></h2>
-    <p class="text-muted mb-0">Your career intelligence at a glance.</p>
-  </div>
-  <a href="{{ url_for('assistant.index') }}" class="btn btn-primary"><i class="bi bi-stars me-1"></i> Ask AI</a>
+<div class="page-heading d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+  <div><div class="eyebrow">CAREER COMMAND CENTER</div><h1 class="mb-1">Welcome back, {{ user.name }}.</h1><p class="text-muted mb-0">Your career intelligence, organized in one place.</p></div>
+  <a href="{{ url_for('assistant.index') }}" class="btn btn-primary rounded-pill px-4">✦ Ask AI Assistant</a>
 </div>
 
 <div class="row g-3 mb-4">
-  <div class="col-sm-6 col-xl-3">
-    <div class="card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-start"><span class="text-muted small">Account</span><i class="bi bi-patch-check text-success"></i></div>
-      <div class="fs-5 fw-semibold mt-2">Verified</div><div class="small text-success mt-1">Account is active</div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-start"><span class="text-muted small">Resume</span><i class="bi bi-file-earmark-person text-primary"></i></div>
-      <div class="fs-5 fw-semibold mt-2">
-        {% if primary_resume %}{% if primary_resume.status == "completed" %}Ready{% elif primary_resume.status == "failed" %}Needs attention{% else %}Processing{% endif %}{% else %}Not uploaded{% endif %}
-      </div>
-      <div class="small text-muted mt-1">{% if primary_resume and primary_resume.status == 'completed' %}Primary resume{% else %}Upload to unlock insights{% endif %}</div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-start"><span class="text-muted small">Target role</span><i class="bi bi-crosshair text-warning"></i></div>
-      <div class="fs-5 fw-semibold mt-2 text-truncate">{{ profile.target_role if profile and profile.target_role else "Not set" }}</div>
-      <div class="small text-muted mt-1">Your career direction</div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-start"><span class="text-muted small">Skills tracked</span><i class="bi bi-lightning-charge text-primary"></i></div>
-      <div class="fs-5 fw-semibold mt-2">{{ skill_count }}</div><div class="small text-muted mt-1">Skills in your profile</div>
-    </div>
-  </div>
+  <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon purple">◈</span><div><small>Account</small><strong class="text-success">Verified</strong><span>Profile is active</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon cyan">▣</span><div><small>Resume</small><strong>{% if primary_resume %}{% if primary_resume.status == "completed" %}Ready{% elif primary_resume.status == "failed" %}Needs review{% else %}Processing{% endif %}{% else %}Not added{% endif %}</strong><span>Resume intelligence</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon gold">◎</span><div><small>Target role</small><strong>{{ profile.target_role if profile and profile.target_role else "Not set" }}</strong><span>Your career direction</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="metric-card"><span class="metric-icon green">✦</span><div><small>Skills tracked</small><strong>{{ skill_count }}</strong><span>{{ cert_count }} certifications</span></div></div></div>
 </div>
 
 {% if not primary_resume %}
-  <div class="card p-4 mb-4" style="background:linear-gradient(135deg,rgba(99,91,255,.10),rgba(139,92,246,.04));border-color:rgba(99,91,255,.16);">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-      <div><span class="badge mb-2" style="background:var(--brand-soft);color:var(--brand);">NEXT STEP</span><h5 class="mb-1">Start with your resume</h5><p class="text-muted mb-0">Upload your resume to automatically extract skills and experience.</p></div>
-      <a href="{{ url_for('resume.index') }}" class="btn btn-primary flex-shrink-0">Upload resume <i class="bi bi-arrow-right ms-1"></i></a>
-    </div>
-  </div>
+  <div class="onboarding-banner mb-4"><div class="banner-icon">↑</div><div><strong>Start with your resume</strong><p class="mb-0">Upload it to automatically extract skills, experience, and career signals.</p></div><a href="{{ url_for('resume.index') }}" class="btn btn-light rounded-pill ms-auto">Upload resume</a></div>
 {% elif not profile or not profile.target_role %}
-  <div class="card p-4 mb-4" style="background:linear-gradient(135deg,rgba(99,91,255,.10),rgba(139,92,246,.04));border-color:rgba(99,91,255,.16);">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-      <div><span class="badge mb-2" style="background:var(--brand-soft);color:var(--brand);">NEXT STEP</span><h5 class="mb-1">Define your target role</h5><p class="text-muted mb-0">Complete your profile to unlock more personalized career intelligence.</p></div>
-      <a href="{{ url_for('profile.index') }}" class="btn btn-primary flex-shrink-0">Complete profile <i class="bi bi-arrow-right ms-1"></i></a>
-    </div>
-  </div>
+  <div class="onboarding-banner mb-4"><div class="banner-icon">◎</div><div><strong>Complete your career profile</strong><p class="mb-0">Set your target role so JobMarket AI can personalize your insights.</p></div><a href="{{ url_for('profile.index') }}" class="btn btn-light rounded-pill ms-auto">Complete profile</a></div>
 {% else %}
-  <div class="row g-3 mb-4">
-    <div class="col-md-6 col-xl-3"><a class="card p-3 h-100 text-reset d-block" href="{{ url_for('job.index') }}"><i class="bi bi-file-bar-graph text-primary fs-4"></i><h6 class="mt-3 mb-1">Analyze a job</h6><p class="small text-muted mb-0">Understand a posting in seconds.</p></a></div>
-    <div class="col-md-6 col-xl-3"><a class="card p-3 h-100 text-reset d-block" href="{{ url_for('matching.index') }}"><i class="bi bi-bullseye text-primary fs-4"></i><h6 class="mt-3 mb-1">Run a match</h6><p class="small text-muted mb-0">Measure resume-to-job fit.</p></a></div>
-    <div class="col-md-6 col-xl-3"><a class="card p-3 h-100 text-reset d-block" href="{{ url_for('roadmap.index') }}"><i class="bi bi-signpost-split text-primary fs-4"></i><h6 class="mt-3 mb-1">Open roadmap</h6><p class="small text-muted mb-0">Plan your next skills.</p></a></div>
-    <div class="col-md-6 col-xl-3"><a class="card p-3 h-100 text-reset d-block" href="{{ url_for('market.dashboard') }}"><i class="bi bi-bar-chart-line text-primary fs-4"></i><h6 class="mt-3 mb-1">Market insights</h6><p class="small text-muted mb-0">Explore demand signals.</p></a></div>
-  </div>
+  <div class="onboarding-banner mb-4"><div class="banner-icon">✦</div><div><strong>Your workspace is ready</strong><p class="mb-0">Explore matching, market insights, roadmap, and AI-powered career analysis.</p></div><a href="{{ url_for('matching.index') }}" class="btn btn-light rounded-pill ms-auto">Explore matching</a></div>
 {% endif %}
 
-<div class="d-flex justify-content-between align-items-center mb-2"><h6 class="mb-0">Profile snapshot</h6><a href="{{ url_for('profile.index') }}" class="small">Manage profile <i class="bi bi-arrow-up-right"></i></a></div>
-<div class="card p-3">
-  <div class="row g-3">
-    <div class="col-sm-6"><span class="text-muted small d-block">Certifications</span><strong>{{ cert_count }}</strong></div>
-    <div class="col-sm-6"><span class="text-muted small d-block">Skills tracked</span><strong>{{ skill_count }}</strong></div>
-  </div>
+<div class="row g-4">
+  <div class="col-lg-8"><div class="card p-4 h-100"><div class="d-flex justify-content-between align-items-start mb-4"><div><div class="eyebrow">YOUR TOOLKIT</div><h5 class="mb-1">Move from profile to opportunity</h5><p class="text-muted small mb-0">Use each intelligence layer to make your next career step clearer.</p></div></div><div class="row g-3">
+    <div class="col-md-6"><a class="tool-card" href="{{ url_for('job.search') }}"><span>⌕</span><div><strong>Find opportunities</strong><small>Search and explore relevant jobs.</small></div><b>→</b></a></div>
+    <div class="col-md-6"><a class="tool-card" href="{{ url_for('matching.index') }}"><span>◈</span><div><strong>Analyze your match</strong><small>Understand skills and job alignment.</small></div><b>→</b></a></div>
+    <div class="col-md-6"><a class="tool-card" href="{{ url_for('roadmap.index') }}"><span>↗</span><div><strong>Build a roadmap</strong><small>Turn skill gaps into learning steps.</small></div><b>→</b></a></div>
+    <div class="col-md-6"><a class="tool-card" href="{{ url_for('market.dashboard') }}"><span>◌</span><div><strong>Read the market</strong><small>Explore demand and skill signals.</small></div><b>→</b></a></div>
+  </div></div></div>
+  <div class="col-lg-4"><div class="card p-4 h-100 ai-panel"><div class="ai-orb">✦</div><div class="eyebrow">AI CAREER ASSISTANT</div><h5>Have a career question?</h5><p class="text-muted small">Ask about your resume, skill gaps, job matches, learning priorities, or career direction.</p><a href="{{ url_for('assistant.index') }}" class="btn btn-primary w-100 rounded-pill">Start a conversation</a></div></div>
 </div>
-<div class="mt-4"><a href="{{ url_for('auth.delete_account') }}" class="small text-danger">Delete my account</a></div>
+
+<div class="mt-4"><a href="{{ url_for('auth.delete_account') }}" class="small text-danger text-decoration-none">Delete my account</a></div>
 {% endblock %}

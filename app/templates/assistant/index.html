@@ -28,7 +28,8 @@
 {% if conversations %}
   <div class="card p-3">
     <h6 class="mb-3">Past conversations</h6>
-    <table class="table table-sm align-middle mb-0">
+    <div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
       <thead><tr><th>Question</th><th>Updated</th><th></th></tr></thead>
       <tbody>
         {% for conv in conversations %}
@@ -45,6 +46,7 @@
         {% endfor %}
       </tbody>
     </table>
+</div>
   </div>
 {% endif %}
 {% endblock %}
