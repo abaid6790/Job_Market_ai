@@ -1,22 +1,89 @@
 {% extends "base.html" %}
 {% from "_form_macros.html" import field %}
-{% block title %}Sign up — {{ app_name }}{% endblock %}
+{% block title %}Create account — {{ app_name }}{% endblock %}
 {% block content %}
-<div class="auth-card mx-auto">
-  <h2 class="mb-1">Create your account</h2>
-  <p class="text-muted mb-4">Start analyzing your fit for the job market in minutes.</p>
-  <form method="POST" novalidate>
-    {{ form.hidden_tag() }}
-    {{ field(form.name, autofocus=True) }}
-    {{ field(form.email) }}
-    {{ field(form.password) }}
-    {{ field(form.confirm_password) }}
-    <div class="d-grid">
-      {{ form.submit(class="btn btn-primary") }}
+<section class="auth-page auth-register-page" aria-labelledby="register-title">
+  <div class="auth-shell auth-register-shell">
+    <div class="auth-showcase auth-register-showcase">
+      <div class="auth-grid-glow"></div>
+      <div class="auth-orbit auth-orbit-one"></div>
+      <div class="auth-orbit auth-orbit-two"></div>
+
+      <div class="auth-showcase-top">
+        <div class="auth-mini-brand"><span class="brand-symbol"><span></span><span></span><span></span></span><span>JobMarket <b>AI</b></span></div>
+        <span class="auth-status"><i></i> Start your journey</span>
+      </div>
+
+      <div class="auth-showcase-content">
+        <span class="auth-kicker">BUILD YOUR CAREER INTELLIGENCE PROFILE</span>
+        <h1>Make your next<br><span>career move</span> count.</h1>
+        <p>Create your personal career workspace and turn your resume, skills, job goals, and market signals into a clear strategy.</p>
+
+        <div class="auth-steps">
+          <div class="auth-step active">
+            <span>01</span>
+            <div><strong>Create your profile</strong><small>Set up your personal career workspace in seconds.</small></div>
+          </div>
+          <div class="auth-step">
+            <span>02</span>
+            <div><strong>Analyze &amp; match</strong><small>Discover roles and understand where you fit.</small></div>
+          </div>
+          <div class="auth-step">
+            <span>03</span>
+            <div><strong>Plan your next move</strong><small>Use AI insights to close gaps and grow.</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-showcase-footer"><span>Profile</span><i></i><span>Analyze</span><i></i><span>Match</span><i></i><span>Grow</span></div>
     </div>
-  </form>
-  <p class="text-center text-muted mt-3 mb-0">
-    Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
-  </p>
-</div>
+
+    <div class="auth-form-panel">
+      <div class="auth-form-wrap auth-register-form-wrap">
+        <div class="auth-form-heading">
+          <span class="auth-mobile-mark">✦</span>
+          <div>
+            <span class="auth-form-eyebrow">GET STARTED</span>
+            <h2 id="register-title">Create your workspace</h2>
+            <p>Build your JobMarket AI profile and start making smarter career decisions.</p>
+          </div>
+        </div>
+
+        <form method="POST" novalidate class="auth-form auth-register-form">
+          {{ form.hidden_tag() }}
+
+          <div class="register-field-highlight">
+            <div class="register-field-icon">◎</div>
+            <div class="register-field-body">{{ field(form.name, autofocus=True) }}</div>
+          </div>
+
+          {{ field(form.email) }}
+
+          <div class="register-password-row">
+            {{ field(form.password) }}
+            {{ field(form.confirm_password) }}
+          </div>
+
+          <div class="register-password-note">
+            <span class="register-check">✓</span>
+            <span>Use a strong password that you don't reuse on other services.</span>
+          </div>
+
+          <div class="d-grid auth-submit-wrap">
+            {{ form.submit(class="btn btn-primary auth-submit", value="Create my JobMarket AI account") }}
+          </div>
+        </form>
+
+        <div class="auth-divider"><span>private career workspace</span></div>
+        <div class="auth-security">
+          <span>⌁</span>
+          <div><strong>Your career data stays yours</strong><small>Your account information is protected and isolated to your workspace.</small></div>
+        </div>
+
+        <p class="auth-create">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in instead <span>→</span></a></p>
+        <a class="auth-resend" href="{{ url_for('auth.resend_verification') }}">Already registered but need verification?</a>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

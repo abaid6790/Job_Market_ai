@@ -2,27 +2,70 @@
 {% from "_form_macros.html" import field %}
 {% block title %}Log in — {{ app_name }}{% endblock %}
 {% block content %}
-<div class="auth-card mx-auto">
-  <h2 class="mb-1">Welcome back</h2>
-  <p class="text-muted mb-4">Log in to your JobMarket AI account.</p>
-  <form method="POST" novalidate>
-    {{ form.hidden_tag() }}
-    {{ field(form.email, autofocus=True) }}
-    {{ field(form.password) }}
-    <div class="form-check mb-3">
-      {{ form.remember_me(class="form-check-input") }}
-      {{ form.remember_me.label(class="form-check-label") }}
+<section class="auth-page" aria-labelledby="login-title">
+  <div class="auth-shell">
+    <div class="auth-showcase">
+      <div class="auth-grid-glow"></div>
+      <div class="auth-showcase-top">
+        <div class="auth-mini-brand"><span class="brand-symbol"><span></span><span></span><span></span></span><span>JobMarket <b>AI</b></span></div>
+        <span class="auth-status"><i></i> Career intelligence</span>
+      </div>
+
+      <div class="auth-showcase-content">
+        <span class="auth-kicker">YOUR CAREER, INTELLIGENTLY ANALYZED</span>
+        <h1>Turn your next<br><span>career move</span> into a strategy.</h1>
+        <p>Analyze your resume, discover high-value skills, match with opportunities, and build a smarter path forward — all in one workspace.</p>
+
+        <div class="auth-insights">
+          <div class="auth-insight">
+            <span class="insight-icon purple">✦</span>
+            <div><strong>AI-powered matching</strong><small>See where your profile fits best.</small></div>
+          </div>
+          <div class="auth-insight">
+            <span class="insight-icon cyan">↗</span>
+            <div><strong>Career intelligence</strong><small>Track skills, roles and market signals.</small></div>
+          </div>
+          <div class="auth-insight">
+            <span class="insight-icon gold">✓</span>
+            <div><strong>Actionable progress</strong><small>Turn insights into your next step.</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-showcase-footer"><span>Analyze</span><i></i><span>Match</span><i></i><span>Discover</span><i></i><span>Grow</span></div>
     </div>
-    <div class="d-grid">
-      {{ form.submit(class="btn btn-primary") }}
+
+    <div class="auth-form-panel">
+      <div class="auth-form-wrap">
+        <div class="auth-form-heading">
+          <span class="auth-mobile-mark">✦</span>
+          <div>
+            <span class="auth-form-eyebrow">WELCOME BACK</span>
+            <h2 id="login-title">Sign in to your workspace</h2>
+            <p>Continue where you left off and keep your career moving.</p>
+          </div>
+        </div>
+
+        <form method="POST" novalidate class="auth-form">
+          {{ form.hidden_tag() }}
+          {{ field(form.email, autofocus=True) }}
+          {{ field(form.password) }}
+          <div class="auth-options">
+            <label class="auth-remember">{{ form.remember_me() }}<span>Remember me</span></label>
+            <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+          </div>
+          <div class="d-grid auth-submit-wrap">
+            {{ form.submit(class="btn btn-primary auth-submit", value="Sign in to JobMarket AI") }}
+          </div>
+        </form>
+
+        <div class="auth-divider"><span>secure career workspace</span></div>
+        <div class="auth-security"><span>⌁</span><div><strong>Your data stays yours</strong><small>Your account and career information are protected.</small></div></div>
+
+        <p class="auth-create">New to JobMarket AI? <a href="{{ url_for('auth.register') }}">Create your account <span>→</span></a></p>
+        <a class="auth-resend" href="{{ url_for('auth.resend_verification') }}">Need another verification email?</a>
+      </div>
     </div>
-  </form>
-  <div class="d-flex justify-content-between mt-3">
-    <a href="{{ url_for('auth.forgot_password') }}" class="small">Forgot password?</a>
-    <a href="{{ url_for('auth.resend_verification') }}" class="small">Resend verification email</a>
   </div>
-  <p class="text-center text-muted mt-3 mb-0">
-    New here? <a href="{{ url_for('auth.register') }}">Create an account</a>
-  </p>
-</div>
+</section>
 {% endblock %}
